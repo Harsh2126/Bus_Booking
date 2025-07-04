@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
   const routeFrom = searchParams.get('routeFrom');
   const routeTo = searchParams.get('routeTo');
   const date = searchParams.get('date');
-  const query: any = {};
+  const query: Record<string, unknown> = {};
   if (bus) query.bus = bus;
   if (routeFrom) query.routeFrom = routeFrom;
   if (routeTo) query.routeTo = routeTo;

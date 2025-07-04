@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
       payment_capture: true,
     });
     return NextResponse.json({ orderId: order.id, amount: order.amount, currency: order.currency });
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: 'Failed to create order' }, { status: 500 });
   }
 } 

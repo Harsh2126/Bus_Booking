@@ -2,8 +2,27 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
+interface Booking {
+  _id: string;
+  userId: string;
+  exam: string;
+  city: string;
+  date: string;
+  bus: string;
+  busNumber?: string;
+  routeFrom: string;
+  routeTo: string;
+  timing?: string;
+  contactNumber?: string;
+  seatNumbers: string[];
+  price: number;
+  upiTxnId?: string;
+  upiScreenshot?: string;
+  status: string;
+}
+
 export default function PendingBookingsPage() {
-  const [bookings, setBookings] = useState<any[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -13,7 +32,7 @@ export default function PendingBookingsPage() {
     fetch("/api/bookings/all")
       .then((res) => res.json())
       .then((data) => {
-        setBookings(Array.isArray(data.bookings) ? data.bookings.filter((b: any) => b.status === "pending") : []);
+        setBookings(Array.isArray(data.bookings) ? data.bookings.filter((b: Booking) => b.status === "pending") : []);
       })
       .catch(() => setBookings([]))
       .finally(() => setLoading(false));

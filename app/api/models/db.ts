@@ -6,13 +6,18 @@ if (!MONGODB_URI) {
   throw new Error('Please define the MONGODB_URI environment variable');
 }
 
-let cached = (global as any).mongoose;
-
-if (!cached) {
-  cached = (global as any).mongoose = { conn: null, promise: null };
-}
-
 async function dbConnect() {
+  let cached = (global as typeof global & { mongoose?: { conn: unknown; promise: unknown } }).mongoose;
+
+  if (!cached) {
+    (global as typeof global & { mongoose?: { conn: unknown; promise: unknown } }).mongoose = { conn: null, promise: null };
+    cached = (global as typeof global & { mongoose?: { conn: unknown; promise: unknown } }).mongoose;
+  }
+
+  if (!cached) {
+    throw new Error('Could not initialize mongoose cache');
+  }
+
   if (cached.conn) {
     return cached.conn;
   }

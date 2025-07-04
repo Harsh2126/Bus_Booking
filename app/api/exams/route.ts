@@ -3,7 +3,7 @@ import dbConnect from '../models/db';
 import Exam from '../models/Exam';
 
 // GET /api/exams
-export async function GET(req: NextRequest) {
+export async function GET() {
   await dbConnect();
   const exams = await Exam.find();
   return NextResponse.json({ exams });

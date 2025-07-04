@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     const res = NextResponse.json({ message: 'Login successful', token });
     res.cookies.set('token', token, { httpOnly: true, path: '/' });
     return res;
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 } 

@@ -3,8 +3,16 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 
+interface Analytics {
+  totalBookings: number;
+  totalUsers: number;
+  totalAdmins: number;
+  topCities: { city: string; count: number }[];
+  bookingsPerDay: { _id: string; count: number }[];
+}
+
 export default function AdminAnalyticsPage() {
-  const [analytics, setAnalytics] = useState<any>(null);
+  const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const router = useRouter();
@@ -39,7 +47,7 @@ export default function AdminAnalyticsPage() {
             <StatCard label="Total Bookings" value={analytics.totalBookings} />
             <StatCard label="Total Users" value={analytics.totalUsers} />
             <StatCard label="Total Admins" value={analytics.totalAdmins} />
-            <StatCard label="Top Cities" value={analytics.topCities.map((c: any) => `${c.city} (${c.count})`).join(', ') || 'N/A'} />
+            <StatCard label="Top Cities" value={analytics.topCities.map((c) => `${c.city} (${c.count})`).join(', ') || 'N/A'} />
           </div>
           <h2 style={{ fontSize: '1.3rem', fontWeight: 700, marginBottom: 18 }}>Bookings Per Day (Last 7 Days)</h2>
           <BookingsChart data={analytics.bookingsPerDay} />
@@ -49,7 +57,7 @@ export default function AdminAnalyticsPage() {
   );
 }
 
-function StatCard({ label, value }: { label: string; value: any }) {
+function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
     <div style={{ background: 'rgba(255,255,255,0.10)', borderRadius: 16, padding: 24, minWidth: 180, textAlign: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
       <div style={{ fontWeight: 700, fontSize: '1.1rem', marginBottom: 8 }}>{label}</div>

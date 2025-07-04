@@ -36,6 +36,39 @@ const palettes = {
 
 const BUS_TYPES = ["AC", "Non-AC", "Sleeper", "Seater"];
 
+interface Bus {
+  _id?: string;
+  name: string;
+  number?: string;
+  type?: string;
+  capacity?: number;
+  routeFrom?: string;
+  routeTo?: string;
+  date?: string;
+  contactNumber?: string;
+  timing?: string;
+  price?: number;
+  exams?: string[];
+}
+
+interface Booking {
+  _id?: string;
+  exam?: string;
+  city?: string;
+  date?: string;
+  bus?: string;
+  busNumber?: string;
+  routeFrom?: string;
+  routeTo?: string;
+  timing?: string;
+  contactNumber?: string;
+  seatNumbers: string[];
+  price?: number;
+  status?: 'pending' | 'confirmed' | 'rejected';
+  userId?: string;
+  type?: string;
+}
+
 export default function BookExamPage() {
   const [exams, setExams] = useState<{ name: string; cities: string[] }[]>([]);
   const [selectedExam, setSelectedExam] = useState('');
@@ -46,8 +79,8 @@ export default function BookExamPage() {
   const [selectedDate, setSelectedDate] = useState('');
   const [showResults, setShowResults] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [bookingDetails, setBookingDetails] = useState<any>(null);
-  const [socket, setSocket] = useState<any>(null);
+  const [bookingDetails, setBookingDetails] = useState<Booking | null>(null);
+  const [socket, setSocket] = useState<ReturnType<typeof io> | null>(null);
   const [bookingStatus, setBookingStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,15 +88,15 @@ export default function BookExamPage() {
   const [toast, setToast] = useState<string | null>(null);
   const { theme } = useContext(ThemeContext);
   const palette = theme === 'light' ? palettes.classicCorporate : palettes.blueSlate;
-  const [buses, setBuses] = useState<any[]>([]);
+  const [buses, setBuses] = useState<Bus[]>([]);
   const router = useRouter();
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
-  const [busToBook, setBusToBook] = useState<any>(null);
+  const [busToBook, setBusToBook] = useState<Bus | null>(null);
   const [showUPIModal, setShowUPIModal] = useState(false);
   const [upiScreenshot, setUpiScreenshot] = useState<File | null>(null);
   const [upiTxnId, setUpiTxnId] = useState('');
   const [pendingMsg, setPendingMsg] = useState('');
-  const [allBookings, setAllBookings] = useState<any[]>([]);
+  const [allBookings, setAllBookings] = useState<Booking[]>([]);
 
   // Razorpay script loader
   useEffect(() => {
@@ -219,7 +252,7 @@ export default function BookExamPage() {
       setLoading(false);
       return;
     }
-    const busObj = buses.find(b => b._id === busToBook._id);
+    const busObj = buses.find(b => b._id === busToBook?._id);
     const amount = 50000; // 500 INR in paise (for demo, make dynamic as needed)
     try {
       // 1. Create order on backend
@@ -243,8 +276,7 @@ export default function BookExamPage() {
         description: 'Bus ticket booking payment',
         order_id: orderData.orderId,
         handler: function (response: any) {
-          // On payment success, call booking API
-          handleBookNow(busToBook.name);
+          handleBookNow(busToBook ? busToBook.name : '');
         },
         prefill: {
           email: user?.email,
@@ -253,7 +285,7 @@ export default function BookExamPage() {
           color: '#3399cc'
         }
       };
-      // @ts-ignore
+      // @ts-expect-error
       const rzp = new window.Razorpay(options);
       rzp.open();
     } catch (err) {
@@ -310,7 +342,7 @@ export default function BookExamPage() {
       setLoading(false);
       return;
     }
-    const busObj = buses.find(b => b._id === busToBook._id);
+    const busObj = buses.find(b => b._id === busToBook?._id);
     // Upload screenshot if present
     let screenshotUrl = '';
     if (upiScreenshot) {
@@ -350,7 +382,7 @@ export default function BookExamPage() {
       status: 'pending',
     };
     console.log('Booking details to send:', details); // Debug log
-    setBookingDetails(details);
+    setBookingDetails({ ...details, status: 'pending' as Booking['status'] });
     setShowConfirmation(false);
     setShowUPIModal(false);
     setShowResults(false);
@@ -501,15 +533,14 @@ export default function BookExamPage() {
               console.log('Selected:', selectedExam, selectedRouteFrom, selectedRouteTo, selectedType, formattedSelectedDate);
               // Filter buses by exam, route, type, date (case-insensitive, formatted date)
               const filteredBuses = buses.filter(bus =>
-                (bus.exams
-                  ? bus.exams
-                      .filter((e: any) => typeof e === 'string')
-                      .map((e: string) => e.toLowerCase())
-                      .includes(selectedExam.toLowerCase())
-                  : (bus.exam ? bus.exam.toLowerCase() === selectedExam.toLowerCase() : true)) &&
-                bus.routeFrom.toLowerCase() === selectedRouteFrom.toLowerCase() &&
-                bus.routeTo.toLowerCase() === selectedRouteTo.toLowerCase() &&
-                bus.type.toLowerCase() === selectedType.toLowerCase() &&
+                bus.exams &&
+                bus.exams
+                  .filter((e: any) => typeof e === 'string')
+                  .map((e: string) => e.toLowerCase())
+                  .includes(selectedExam.toLowerCase()) &&
+                (bus.routeFrom || '').toLowerCase() === selectedRouteFrom.toLowerCase() &&
+                (bus.routeTo || '').toLowerCase() === selectedRouteTo.toLowerCase() &&
+                (bus.type || '').toLowerCase() === selectedType.toLowerCase() &&
                 bus.date === formattedSelectedDate
               );
               // For each bus, count booked seats
@@ -523,7 +554,7 @@ export default function BookExamPage() {
                   b.date === bus.date
                 );
                 const bookedSeats = bookingsForBus.reduce((acc, b) => acc + (Array.isArray(b.seatNumbers) ? b.seatNumbers.length : 0), 0);
-                if (bookedSeats >= bus.capacity) {
+                if (bookedSeats >= (bus.capacity || 0)) {
                   fullyBookedBuses.push(bus);
                 } else {
                   availableBuses.push(bus);
@@ -536,10 +567,10 @@ export default function BookExamPage() {
                   availableBuses.map(bus => (
                     <div key={bus._id} style={{ background: theme === 'light' ? palette.bgLight : 'rgba(255,255,255,0.10)', borderRadius: 14, padding: 18, marginBottom: 12 }}>
                       <div style={{ fontWeight: 600, color: palette.primary }}>{bus.name}</div>
-                      <div style={{ fontSize: 15, color: theme === 'light' ? palette.secondary : palette.textDark }}>{bus.routeFrom} → {bus.routeTo}</div>
-                      <div style={{ fontSize: 14, color: theme === 'light' ? palette.secondary : palette.textDark }}>Type: {bus.type}</div>
+                      <div style={{ fontSize: 15, color: theme === 'light' ? palette.secondary : palette.textDark }}>{bus.routeFrom || ''} → {bus.routeTo || ''}</div>
+                      <div style={{ fontSize: 14, color: theme === 'light' ? palette.secondary : palette.textDark }}>Type: {bus.type || ''}</div>
                       <div style={{ fontSize: 14, color: theme === 'light' ? palette.secondary : palette.textDark }}>Date: {selectedDate}</div>
-                      <div style={{ fontSize: 14, color: theme === 'light' ? palette.secondary : palette.textDark }}><b>Price per Seat:</b> ₹{bus.price}</div>
+                      <div style={{ fontSize: 14, color: theme === 'light' ? palette.secondary : palette.textDark }}><b>Price per Seat:</b> ₹{bus.price || 0}</div>
                       <button onClick={() => setBusToBook(bus)} disabled={loading} style={{ display: 'inline-block', marginTop: 10, padding: '8px 24px', borderRadius: '18px', background: `linear-gradient(90deg, ${palette.accent} 0%, ${palette.primary} 100%)`, color: '#fff', fontWeight: 600, border: 'none', cursor: loading ? 'not-allowed' : 'pointer' }}>Book Now</button>
                     </div>
                   ))
@@ -549,8 +580,8 @@ export default function BookExamPage() {
                   {fullyBookedBuses.map(bus => (
                     <div key={bus._id} style={{ background: '#f8d7da', borderRadius: 14, padding: 18, marginBottom: 12, color: '#721c24' }}>
                       <div style={{ fontWeight: 600 }}>{bus.name}</div>
-                      <div>{bus.routeFrom} → {bus.routeTo}</div>
-                      <div>Type: {bus.type}</div>
+                      <div>{bus.routeFrom || ''} → {bus.routeTo || ''}</div>
+                      <div>Type: {bus.type || ''}</div>
                       <div>Date: {selectedDate}</div>
                       <div><b>Price per Seat:</b> ₹{bus.price}</div>
                       <div style={{ fontWeight: 700, color: '#b23b3b', marginTop: 6 }}>Fully Booked</div>
@@ -567,7 +598,7 @@ export default function BookExamPage() {
             <div style={{ marginBottom: 12 }}>
               <div><b>Exam:</b> {bookingDetails.exam}</div>
               <div><b>Route:</b> {bookingDetails.routeFrom} → {bookingDetails.routeTo}</div>
-              <div><b>Type:</b> {bookingDetails.type}</div>
+              <div><b>Type:</b> {bookingDetails.type || ''}</div>
               <div><b>Date:</b> {bookingDetails.date}</div>
               <div><b>Bus:</b> {bookingDetails.bus}</div>
               <div><b>Seats:</b> {Array.isArray(bookingDetails.seatNumbers) ? bookingDetails.seatNumbers.join(', ') : ''}</div>
@@ -580,7 +611,7 @@ export default function BookExamPage() {
         )}
         {busToBook && (
           <div style={{ marginTop: 24 }}>
-            <SeatSelector userId={user?.email || ''} busId={busToBook._id} capacity={busToBook.capacity} onSelect={setSelectedSeats} />
+            <SeatSelector userId={user?.email || ''} busId={busToBook._id || ''} capacity={busToBook.capacity || 0} onSelect={setSelectedSeats} />
             <button
               onClick={() => selectedSeats.length > 0 && setShowUPIModal(true)}
               disabled={selectedSeats.length === 0 || loading}
@@ -603,7 +634,7 @@ export default function BookExamPage() {
               <div style={{ margin: '12px 0 8px 0', fontWeight: 600 }}>Or Enter UPI Transaction ID</div>
               <input type="text" value={upiTxnId} onChange={e => setUpiTxnId(e.target.value)} placeholder="Transaction ID" style={{ width: '100%', padding: 8, borderRadius: 8, border: '1.5px solid #2563eb', marginBottom: 16 }} />
               <div style={{ margin: '16px 0', fontWeight: 700, color: '#2563eb', fontSize: 18 }}>
-                Total Payment: ₹{busToBook && selectedSeats.length > 0 ? (busToBook.price * selectedSeats.length) : 0}
+                Total Payment: ₹{busToBook && selectedSeats.length > 0 ? ((busToBook.price || 0) * selectedSeats.length) : 0}
               </div>
               <button onClick={handleUPIPayment} disabled={loading} style={{ width: '100%', padding: '12px 0', borderRadius: 12, background: `linear-gradient(90deg, #36b37e 0%, #2563eb 100%)`, color: '#fff', fontWeight: 700, fontSize: '1.08rem', border: 'none', boxShadow: '0 2px 12px rgba(0,0,0,0.10)', cursor: loading ? 'not-allowed' : 'pointer', marginTop: 8 }}>Submit Payment</button>
             </div>

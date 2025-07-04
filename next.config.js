@@ -1,10 +1,12 @@
-const withPWA = require('next-pwa')({
-    dest: 'public',
-    register: true,
-    skipWaiting: true,
-});
+// const withPWA = require('next-pwa')({
+//   dest: 'public',
+//   disable: true, //disable completely
+// });
 
-module.exports = withPWA({
-  // ...your Next.js config options
-  // PWA options should NOT be here
-});
+// module.exports = withPWA({
+//   reactStrictMode: true,
+// // });
+
+module.exports = {
+  reactStrictMode: true,
+};

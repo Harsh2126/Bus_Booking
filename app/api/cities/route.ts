@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import City from '../models/City';
 import dbConnect from '../models/db';
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   await dbConnect();
   const cities = await City.find();
   const mappedCities = cities.map(city => ({

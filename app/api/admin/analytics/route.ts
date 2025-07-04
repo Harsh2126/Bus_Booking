@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import Booking from '../../models/Booking';
 import dbConnect from '../../models/db';
 import User from '../../models/User';
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   await dbConnect();
   const totalBookings = await Booking.countDocuments();
   const totalUsers = await User.countDocuments();

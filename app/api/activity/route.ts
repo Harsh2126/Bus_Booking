@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import Booking from '../models/Booking';
 import dbConnect from '../models/db';
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   await dbConnect();
   // Fetch the 10 most recent bookings
   const bookings = await Booking.find().sort({ createdAt: -1 }).limit(10);

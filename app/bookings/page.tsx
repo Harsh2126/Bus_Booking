@@ -33,8 +33,26 @@ const palettes = {
   },
 };
 
+// Add Booking interface
+interface Booking {
+  _id?: string;
+  exam?: string;
+  city?: string;
+  date?: string;
+  bus?: string;
+  busNumber?: string;
+  routeFrom?: string;
+  routeTo?: string;
+  timing?: string;
+  contactNumber?: string;
+  seatNumbers: string[];
+  price?: number;
+  status?: 'pending' | 'confirmed' | 'rejected';
+  userId?: string;
+}
+
 export default function BookingsPage() {
-  const [bookings, setBookings] = useState<any[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const [user, setUser] = useState<{ email: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -87,9 +105,6 @@ export default function BookingsPage() {
         return;
       }
       setBookings(prev => prev.filter((b) => b._id !== id));
-      const s = io();
-      s.emit('notify', { userId: user?.email, message: 'Your booking has been cancelled.' });
-      s.disconnect();
       setToast('Booking cancelled successfully!');
       setTimeout(() => setToast(null), 2500);
     } catch (err) {
@@ -99,7 +114,7 @@ export default function BookingsPage() {
     }
   };
 
-  const handleDownload = (booking: any) => {
+  const handleDownload = (booking: Booking) => {
     const doc = new jsPDF();
     doc.setFontSize(16);
     doc.text('Bus Booking Ticket', 10, 20);
@@ -149,7 +164,9 @@ export default function BookingsPage() {
                   ) : (
                     <span style={{ color: '#b23b3b', fontWeight: 600 }}>Ticket not available until confirmed</span>
                   )}
-                  <button onClick={() => handleCancel(b._id)} disabled={loading} style={{ background: '#ff5e62', color: '#fff', border: 'none', borderRadius: 8, padding: '6px 16px', fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer' }}>Cancel</button>
+                  {b._id && (
+                    <button onClick={() => handleCancel(b._id!)} disabled={loading} style={{ background: '#ff5e62', color: '#fff', border: 'none', borderRadius: 8, padding: '6px 16px', fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer' }}>Cancel</button>
+                  )}
                 </div>
               </li>
             ))}

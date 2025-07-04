@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useContext } from 'react';
-import { FaBell, FaUserCircle } from 'react-icons/fa';
+import { FaUserCircle } from 'react-icons/fa';
 import { ThemeContext } from '../ThemeProvider';
 
 const adminNavLinks = [
@@ -91,7 +91,6 @@ export default function AdminLayout({ children, pageTitle }: { children: React.R
           <div style={{ fontWeight: 700, fontSize: 20, color: theme === 'light' ? palette.primary : palette.textDark, letterSpacing: '1px' }}>{pageTitle || 'Admin'}</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
             <button onClick={toggleTheme} style={{ background: 'none', border: 'none', color: theme === 'light' ? palette.primary : palette.textDark, fontSize: 22, cursor: 'pointer', borderRadius: 8, padding: 6, transition: 'background 0.2s' }}>{theme === 'light' ? '🌙' : '☀️'}</button>
-            <FaBell style={{ fontSize: 22, color: theme === 'light' ? palette.primary : palette.textDark, cursor: 'pointer' }} />
             <Link href="/profile" title="Profile" style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
             <FaUserCircle style={{ fontSize: 32, color: theme === 'light' ? palette.primary : palette.textDark, marginLeft: 8 }} />
             </Link>

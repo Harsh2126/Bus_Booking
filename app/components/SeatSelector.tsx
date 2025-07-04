@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
-import { io } from 'socket.io-client';
+import { io, Socket } from 'socket.io-client';
+
+interface Booking { seatNumbers: string[]; userId: string; }
 
 export default function SeatSelector({ userId, busId, capacity, onSelect }: { userId: string, busId: string, capacity: number, onSelect?: (seats: string[]) => void }) {
-  const [socket, setSocket] = useState<any>(null);
+  const [socket, setSocket] = useState<Socket | null>(null);
   const [seats, setSeats] = useState<{ [seatId: string]: string | null }>({});
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
 
@@ -13,7 +15,7 @@ export default function SeatSelector({ userId, busId, capacity, onSelect }: { us
       .then(data => {
         if (Array.isArray(data)) {
           const taken: { [seatId: string]: string } = {};
-          data.forEach((b: any) => {
+          data.forEach((b: Booking) => {
             if (Array.isArray(b.seatNumbers)) {
               b.seatNumbers.forEach((sn: string) => {
                 taken[sn] = b.userId;

@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     const res = NextResponse.json({ message: 'User created', token });
     res.cookies.set('token', token, { httpOnly: true, path: '/' });
     return res;
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 } 

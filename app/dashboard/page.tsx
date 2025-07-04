@@ -1,11 +1,59 @@
 "use client";
 import jsPDF from 'jspdf';
 import { useRouter } from 'next/navigation';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import io from 'socket.io-client';
 import { ThemeContext } from '../ThemeProvider';
 import AdminUserManager from '../components/AdminUserManager';
 import Spinner from '../components/Spinner';
+
+// Add interfaces
+interface User {
+  email: string;
+  name?: string;
+  age?: number;
+  course?: string;
+  college?: string;
+  role?: string;
+  userId?: string;
+}
+
+interface Booking {
+  _id?: string;
+  bus: string;
+  routeFrom: string;
+  routeTo: string;
+  date: string;
+  seatNumbers: string[];
+  price: number;
+  status: 'pending' | 'confirmed' | 'rejected';
+  exam?: string;
+  type?: string;
+  timing?: string;
+  contactNumber?: string;
+}
+
+interface Bus {
+  _id: string;
+  name: string;
+  number: string;
+  // add other fields as needed
+}
+
+interface Recommendation {
+  _id?: string;
+  icon: string;
+  route: string;
+  desc: string;
+}
+
+interface Analytics {
+  totalUsers: number;
+  totalBookings: number;
+  // add other fields as needed
+}
+
+interface Activity { icon: string; text: string; time?: string; }
 
 const adminNavLinks = [
   { label: 'Dashboard', href: '/dashboard', icon: '🏠' },
@@ -56,41 +104,34 @@ const palettes = {
 };
 
 export default function DashboardPage() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const router = useRouter();
   const { theme, toggleTheme } = useContext(ThemeContext);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const notifications = [
-    { icon: '🚌', text: 'Your bus to Jaipur departs in 2 hours.' },
-    { icon: '✅', text: 'Payment for Mumbai → Pune booking confirmed.' },
-    { icon: '🎁', text: 'Special offer: 10% off on your next trip!' },
-  ];
-  const bellRef = useRef(null);
-  const [activities, setActivities] = useState<any[]>([]);
-  const [recommendations, setRecommendations] = useState<any[]>([]);
-  const [analytics, setAnalytics] = useState<any>(null);
+  const [activities, setActivities] = useState<any[]>([]); // If you have an Activity interface, use it here
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const palette = theme === 'light' ? palettes.classicCorporate : palettes.blueSlate;
-  const [bookings, setBookings] = useState<any[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const [profileComplete, setProfileComplete] = useState(false);
-  const [buses, setBuses] = useState<any[]>([]);
+  const [buses, setBuses] = useState<Bus[]>([]);
 
   useEffect(() => {
     fetch('/api/auth/me')
       .then(async (res) => {
         if (res.ok) {
           const data = await res.json();
-          setUser(data.user);
+          setUser(data.user as User);
           // Fetch bookings for user
           fetch(`/api/bookings?userId=${data.user.userId || data.user.email}`)
             .then(async res => {
               if (!res.ok) return [];
               try { return await res.json(); } catch { return []; }
             })
-            .then(bks => setBookings(Array.isArray(bks) ? bks : []));
+            .then((bks: Booking[]) => setBookings(Array.isArray(bks) ? bks : []));
           // Profile completeness
           setProfileComplete(
             !!(data.user.name && data.user.age && data.user.course && data.user.college)
@@ -102,7 +143,7 @@ export default function DashboardPage() {
                 if (!res.ok) return null;
                 try { return await res.json(); } catch { return null; }
               })
-              .then(setAnalytics);
+              .then((a: Analytics | null) => setAnalytics(a));
             fetch('/api/activity')
               .then(async res => {
                 if (!res.ok) return { activities: [] };
@@ -154,14 +195,14 @@ export default function DashboardPage() {
     }
   };
 
-  const handleDownloadTicket = (booking: any) => {
+  const handleDownloadTicket = (booking: Booking) => {
     if (!booking) return;
     const doc = new jsPDF();
     doc.setFontSize(16);
     doc.text('Bus Booking Ticket', 10, 20);
     doc.setFontSize(12);
     doc.text(`Exam: ${booking.exam || ''}`, 10, 40);
-    doc.text(`Route: ${(booking.routeFrom || booking.city || '') + (booking.routeTo ? ' → ' + booking.routeTo : '')}`, 10, 50);
+    doc.text(`Route: ${(booking.routeFrom || '') + (booking.routeTo ? ' → ' + booking.routeTo : '')}`, 10, 50);
     doc.text(`Type: ${booking.type || ''}`, 10, 60);
     doc.text(`Date: ${booking.date || ''}`, 10, 70);
     doc.text(`Bus: ${booking.bus || ''}`, 10, 80);
@@ -200,7 +241,6 @@ export default function DashboardPage() {
           <div style={{ fontWeight: 700, fontSize: 20, color: theme === 'light' ? palette.primary : palette.textDark, letterSpacing: '1px' }}>{isAdmin ? 'Admin Dashboard' : 'Smartify'}</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
             <button onClick={toggleTheme} style={{ background: 'none', border: 'none', color: theme === 'light' ? palette.primary : palette.textDark, fontSize: 22, cursor: 'pointer', borderRadius: 8, padding: 6, transition: 'background 0.2s' }}>{theme === 'light' ? '🌙' : '☀️'}</button>
-            <div style={{ fontSize: 22, cursor: 'pointer', color: theme === 'light' ? palette.primary : palette.textDark }}>🔔</div>
             <div style={{ width: 38, height: 38, borderRadius: '50%', background: theme === 'light' ? palette.bgLight : palette.bgDark, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 18, color: theme === 'light' ? palette.primary : palette.textDark, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>{user.email[0].toUpperCase()}</div>
           </div>
         </header>
@@ -217,7 +257,7 @@ export default function DashboardPage() {
             <section style={{ margin: '0 auto 40px auto', maxWidth: 800, background: '#fff', borderRadius: 16, boxShadow: '0 2px 12px rgba(0,0,0,0.08)', padding: 32 }}>
               <h3 style={{ fontSize: 24, fontWeight: 800, color: palette.primary, marginBottom: 18, textAlign: 'center' }}>Recommended Buses</h3>
               <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                {recommendations.map((rec: any, idx: number) => {
+                {recommendations.map((rec: Recommendation, idx: number) => {
                   const bus = buses.find(b => b._id === rec.route);
                   return (
                     <li key={rec._id || idx} style={{ display: 'flex', alignItems: 'center', gap: 18, marginBottom: 18, background: '#f4f5f7', borderRadius: 10, padding: 16, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
