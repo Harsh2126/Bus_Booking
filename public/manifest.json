@@ -1,0 +1,16 @@
+{
+  "name": "Smartify Bus Booking",
+  "short_name": "Smartify",
+  "description": "Book your bus tickets easily, quickly, and securely.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f1021",
+  "theme_color": "#1a174d",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48 72x72 96x96 128x128 256x256",
+      "type": "image/x-icon"
+    }
+  ]
+} 
