@@ -1,5 +1,4 @@
 'use client';
-import { loadStripe } from '@stripe/stripe-js';
 import jsPDF from 'jspdf';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -295,38 +294,7 @@ export default function BookExamPage() {
     }
   };
 
-  // Stripe payment handler
-  const handleStripePayment = async () => {
-    setError(null);
-    setLoading(true);
-    if (!user) {
-      setError('You must be logged in to book.');
-      setLoading(false);
-      return;
-    }
-    const amount = 50000; // 500 INR in paise (for demo, make dynamic as needed)
-    try {
-      // 1. Create Stripe Checkout session on backend
-      const sessionRes = await fetch('/api/payment/stripe-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount, email: user.email }),
-      });
-      const sessionData = await sessionRes.json();
-      if (!sessionData.sessionId) {
-        setError('Payment session creation failed.');
-        setLoading(false);
-        return;
-      }
-      // 2. Redirect to Stripe Checkout
-      const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
-      await stripe?.redirectToCheckout({ sessionId: sessionData.sessionId });
-    } catch (err) {
-      setError('Payment failed.');
-    } finally {
-      setLoading(false);
-    }
-  };
+
 
   // UPI payment handler
   const handleUPIPayment = async () => {

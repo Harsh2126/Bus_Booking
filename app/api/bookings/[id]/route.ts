@@ -2,17 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import Booking from '../../models/Booking';
 import dbConnect from '../../models/db';
 
-// @ts-ignore: Next.js type bug, context.params is not a Promise
-export async function PUT(req: NextRequest, context: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   await dbConnect();
+  const { id } = await params;
   const update = await req.json();
-  const booking = await Booking.findByIdAndUpdate(context.params.id, update, { new: true });
+  const booking = await Booking.findByIdAndUpdate(id, update, { new: true });
   return NextResponse.json({ booking });
 }
 
-// @ts-ignore: Next.js type bug, context.params is not a Promise
-export async function DELETE(req: NextRequest, context: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   await dbConnect();
-  await Booking.findByIdAndDelete(context.params.id);
+  const { id } = await params;
+  await Booking.findByIdAndDelete(id);
   return NextResponse.json({ success: true });
 } 
