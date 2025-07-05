@@ -71,35 +71,38 @@ export default function AdminUserManager() {
   };
 
   return (
-    <div style={{ background: 'rgba(255,255,255,0.08)', borderRadius: 16, padding: 24, marginBottom: 32 }}>
-      <h3 style={{ color: theme === 'light' ? '#172b4d' : '#fff', marginBottom: 16 }}>User Management</h3>
-      {error && <div style={{ color: '#ff5e62', marginBottom: 8 }}>{error}</div>}
-      <table style={{ width: '100%', color: theme === 'light' ? '#172b4d' : '#fff', borderCollapse: 'collapse' }}>
+    <div style={{ background: '#334155', borderRadius: 18, padding: 32, marginBottom: 32, boxShadow: '0 2px 12px rgba(0,0,0,0.10)', border: '1px solid #475569', color: '#fff' }}>
+      <h3 style={{ color: '#fff', marginBottom: 24, fontWeight: 800, fontSize: 24, letterSpacing: 0.5 }}>User Management</h3>
+      {error && <div style={{ color: '#ef4444', marginBottom: 8 }}>{error}</div>}
+      <table style={{ width: '100%', color: '#fff', borderCollapse: 'collapse', fontSize: 16 }}>
         <thead>
-          <tr style={{ background: theme === 'light' ? '#e0e7ef' : 'rgba(0,0,0,0.10)' }}>
-            <th style={{ padding: 8, textAlign: 'left', color: theme === 'light' ? '#172b4d' : '#fff' }}>Email</th>
-            <th style={{ padding: 8, textAlign: 'left', color: theme === 'light' ? '#172b4d' : '#fff' }}>Role</th>
-            <th style={{ padding: 8, color: theme === 'light' ? '#172b4d' : '#fff' }}>Actions</th>
+          <tr style={{ background: '#475569' }}>
+            <th style={{ padding: 12, textAlign: 'left', color: '#fff', fontWeight: 700 }}>Email</th>
+            <th style={{ padding: 12, textAlign: 'left', color: '#fff', fontWeight: 700 }}>Role</th>
+            <th style={{ padding: 12, color: '#fff', fontWeight: 700 }}>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {users.map(user => (
-            <tr key={user._id} style={{ borderBottom: '1px solid #333' }}>
-              <td style={{ padding: 8 }}>{user.email}</td>
-              <td style={{ padding: 8 }}>{user.role}</td>
-              <td style={{ padding: 8, display: 'flex', gap: 8 }}>
+          {users.map((user, idx) => (
+            <tr key={user._id} style={{ borderBottom: '1.5px solid #334155', background: idx % 2 === 0 ? '#1e293b' : '#334155', transition: 'background 0.2s' }}
+              onMouseEnter={e => { e.currentTarget.style.background = '#475569'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = idx % 2 === 0 ? '#1e293b' : '#334155'; }}
+            >
+              <td style={{ padding: 12 }}>{user.email}</td>
+              <td style={{ padding: 12 }}>{user.role}</td>
+              <td style={{ padding: 12, display: 'flex', gap: 10 }}>
                 {user.role !== 'admin' ? (
-                  <button onClick={() => handlePromote(user._id)} style={{ background: '#4f8cff', color: '#fff', border: 'none', borderRadius: 6, padding: '4px 10px', fontWeight: 600, cursor: 'pointer' }}>Promote to Admin</button>
+                  <button onClick={() => handlePromote(user._id)} style={{ background: '#3b82f6', color: '#fff', border: 'none', borderRadius: 8, padding: '6px 14px', fontWeight: 700, cursor: 'pointer', fontSize: 15, transition: 'background 0.2s' }}>Promote to Admin</button>
                 ) : (
-                  <button onClick={() => handleDemote(user._id)} style={{ background: '#aaa', color: '#fff', border: 'none', borderRadius: 6, padding: '4px 10px', fontWeight: 600, cursor: 'pointer' }}>Demote to User</button>
+                  <button onClick={() => handleDemote(user._id)} style={{ background: '#64748b', color: '#fff', border: 'none', borderRadius: 8, padding: '6px 14px', fontWeight: 700, cursor: 'pointer', fontSize: 15, transition: 'background 0.2s' }}>Demote to User</button>
                 )}
-                <button onClick={() => handleDelete(user._id)} style={{ background: '#ff5e62', color: '#fff', border: 'none', borderRadius: 6, padding: '4px 10px', fontWeight: 600, cursor: 'pointer' }}>Delete</button>
+                <button onClick={() => handleDelete(user._id)} style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: 8, padding: '6px 14px', fontWeight: 700, cursor: 'pointer', fontSize: 15, transition: 'background 0.2s' }}>Delete</button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-      {loading && <div style={{ color: theme === 'light' ? '#003366' : '#ffeaea', marginTop: 8 }}>Loading...</div>}
+      {loading && <div style={{ color: '#94a3b8', marginTop: 12 }}>Loading...</div>}
     </div>
   );
 } 

@@ -243,9 +243,9 @@ const BusAdminManager = () => {
   const inputStyle = {
     padding: 12,
     borderRadius: 8,
-    border: '1.5px solid #d1d5db',
-    background: '#fff',
-    color: '#1e293b',
+    border: '1.5px solid #475569',
+    background: '#1e293b',
+    color: '#fff',
     fontSize: 16,
     outline: 'none',
     transition: 'border 0.2s',
@@ -257,12 +257,12 @@ const BusAdminManager = () => {
 
   return (
     <div style={{ margin: '32px 0', fontFamily: 'Inter, Segoe UI, Arial, sans-serif' }}>
-      <h2 style={{ marginBottom: 32, fontWeight: 900, fontSize: 36, color: '#1e293b', letterSpacing: '-1px' }}>Bus Management</h2>
-      <div style={{ background: '#fff', borderRadius: 18, boxShadow: '0 6px 32px rgba(0,0,0,0.10)', padding: 36, marginBottom: 36, maxWidth: 1200, marginLeft: 'auto', marginRight: 'auto' }}>
+      <h2 style={{ marginBottom: 32, fontWeight: 900, fontSize: 36, color: '#fff', letterSpacing: '-1px' }}>Bus Management</h2>
+      <div style={{ background: '#334155', borderRadius: 18, boxShadow: '0 6px 32px rgba(0,0,0,0.10)', padding: 36, marginBottom: 36, maxWidth: 1200, marginLeft: 'auto', marginRight: 'auto', border: '1px solid #475569', color: '#fff' }}>
         {editingBusId ? (
           <form onSubmit={handleEditBus} style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 24, rowGap: 18, alignItems: 'end' }}>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <label style={{ marginBottom: 6, fontWeight: 700, color: '#003366', fontSize: 15 }}>Bus name</label>
+              <label style={{ marginBottom: 6, fontWeight: 700, color: '#94a3b8', fontSize: 15 }}>Bus name</label>
               <input
                 type="text"
                 value={editingBus.name}
@@ -273,7 +273,7 @@ const BusAdminManager = () => {
               />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <label style={{ marginBottom: 6, fontWeight: 700, color: '#003366', fontSize: 15 }}>Bus number</label>
+              <label style={{ marginBottom: 6, fontWeight: 700, color: '#94a3b8', fontSize: 15 }}>Bus number</label>
               <input
                 type="text"
                 value={editingBus.number}
@@ -284,7 +284,7 @@ const BusAdminManager = () => {
               />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <label style={{ marginBottom: 6, fontWeight: 700, color: '#003366', fontSize: 15 }}>Type</label>
+              <label style={{ marginBottom: 6, fontWeight: 700, color: '#94a3b8', fontSize: 15 }}>Type</label>
               <select
                 value={editingBus.type}
                 onChange={e => setEditingBus({ ...editingBus, type: e.target.value })}
@@ -295,7 +295,7 @@ const BusAdminManager = () => {
               </select>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <label style={{ marginBottom: 6, fontWeight: 700, color: '#003366', fontSize: 15 }}>Capacity</label>
+              <label style={{ marginBottom: 6, fontWeight: 700, color: '#94a3b8', fontSize: 15 }}>Capacity</label>
               <input
                 type="number"
                 value={editingBus.capacity}
@@ -307,7 +307,7 @@ const BusAdminManager = () => {
               />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <label style={{ marginBottom: 6, fontWeight: 700, color: '#003366', fontSize: 15 }}>Status</label>
+              <label style={{ marginBottom: 6, fontWeight: 700, color: '#94a3b8', fontSize: 15 }}>Status</label>
               <select
                 value={editingBus.status}
                 onChange={e => setEditingBus({ ...editingBus, status: e.target.value })}
@@ -318,7 +318,7 @@ const BusAdminManager = () => {
               </select>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', position: 'relative' }}>
-              <label style={{ marginBottom: 6, fontWeight: 700, color: '#003366', fontSize: 15 }}>Date</label>
+              <label style={{ marginBottom: 6, fontWeight: 700, color: '#94a3b8', fontSize: 15 }}>Date</label>
               <input
                 type="date"
                 value={editingBus.date || ''}
@@ -328,16 +328,16 @@ const BusAdminManager = () => {
               />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gridColumn: 'span 2', position: 'relative' }}>
-              <label style={{ marginBottom: 6, fontWeight: 700, color: '#003366', fontSize: 15 }}>Exams</label>
+              <label style={{ marginBottom: 6, fontWeight: 700, color: '#94a3b8', fontSize: 15 }}>Exams</label>
               <div
                 style={{
-                  background: '#fff',
-                  border: '1.5px solid #d1d5db',
+                  background: '#1e293b',
+                  border: '1.5px solid #475569',
                   borderRadius: 8,
                   minHeight: 44,
                   padding: '10px 12px',
                   fontSize: 16,
-                  color: '#1e293b',
+                  color: '#fff',
                   cursor: 'pointer',
                   userSelect: 'none',
                   position: 'relative',
@@ -346,12 +346,12 @@ const BusAdminManager = () => {
                 tabIndex={0}
               >
                 {editingBus.exams.length === 0
-                  ? <span style={{ color: '#64748b' }}>Select exams</span>
+                  ? <span style={{ color: '#94a3b8' }}>Select exams</span>
                   : exams.filter(exam => editingBus.exams.includes(exam._id)).map(exam => exam.name).join(', ')
                 }
-                <span style={{ float: 'right', color: '#64748b', fontSize: 18, marginLeft: 8 }}>&#9662;</span>
+                <span style={{ float: 'right', color: '#94a3b8', fontSize: 18, marginLeft: 8 }}>&#9662;</span>
                 {showExamDropdown && (
-                  <div ref={examDropdownRef} style={{ position: 'absolute', top: 44, left: 0, zIndex: 10, background: '#fff', border: '1.5px solid #d1d5db', borderRadius: 8, boxShadow: '0 4px 16px rgba(0,0,0,0.10)', width: '100%', maxHeight: 220, overflowY: 'auto', padding: 8 }}>
+                  <div ref={examDropdownRef} style={{ position: 'absolute', top: 44, left: 0, zIndex: 10, background: '#1e293b', border: '1.5px solid #475569', borderRadius: 8, boxShadow: '0 4px 16px rgba(0,0,0,0.10)', width: '100%', maxHeight: 220, overflowY: 'auto', padding: 8 }}>
                     {exams.map(exam => (
                       <label key={exam._id} style={{ display: 'flex', alignItems: 'center', padding: '6px 8px', cursor: 'pointer', borderRadius: 6, transition: 'background 0.2s', fontSize: 15 }}>
                         <input
@@ -374,7 +374,7 @@ const BusAdminManager = () => {
               </div>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <label style={{ marginBottom: 6, fontWeight: 700, color: '#003366', fontSize: 15 }}>Route From</label>
+              <label style={{ marginBottom: 6, fontWeight: 700, color: '#94a3b8', fontSize: 15 }}>Route From</label>
               <select
                 value={editingBus.routeFrom || ''}
                 onChange={e => setEditingBus({ ...editingBus, routeFrom: e.target.value })}
@@ -382,14 +382,14 @@ const BusAdminManager = () => {
                 required
                 style={inputStyle}
               >
-                <option value="" style={{ color: '#64748b', background: '#fff' }}>Select city</option>
+                <option value="" style={{ color: '#94a3b8', background: '#1e293b' }}>Select city</option>
                 {cities.map(city => (
-                  <option key={city.id || city._id || city.name} value={city.name} style={{ color: '#1e293b', background: '#fff' }}>{city.name}</option>
+                  <option key={city.id || city._id || city.name} value={city.name} style={{ color: '#fff', background: '#1e293b' }}>{city.name}</option>
                 ))}
               </select>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <label style={{ marginBottom: 6, fontWeight: 700, color: '#003366', fontSize: 15 }}>Route To</label>
+              <label style={{ marginBottom: 6, fontWeight: 700, color: '#94a3b8', fontSize: 15 }}>Route To</label>
               <select
                 value={editingBus.routeTo || ''}
                 onChange={e => setEditingBus({ ...editingBus, routeTo: e.target.value })}
@@ -397,9 +397,9 @@ const BusAdminManager = () => {
                 required
                 style={inputStyle}
               >
-                <option value="" style={{ color: '#64748b', background: '#fff' }}>Select city</option>
+                <option value="" style={{ color: '#94a3b8', background: '#1e293b' }}>Select city</option>
                 {cities.map(city => (
-                  <option key={city.id || city._id || city.name} value={city.name} style={{ color: '#1e293b', background: '#fff' }}>{city.name}</option>
+                  <option key={city.id || city._id || city.name} value={city.name} style={{ color: '#fff', background: '#1e293b' }}>{city.name}</option>
                 ))}
               </select>
             </div>
@@ -411,7 +411,7 @@ const BusAdminManager = () => {
                   placeholder="Contact number"
                   value={editingBus.contactNumber}
                   onChange={e => setEditingBus({ ...editingBus, contactNumber: e.target.value })}
-                  style={{ width: '100%', padding: 10, borderRadius: 8, border: '1.5px solid #ccc', marginTop: 4, background: '#fff', color: '#222' }}
+                  style={{ width: '100%', padding: 10, borderRadius: 8, border: '1.5px solid #475569', marginTop: 4, background: '#1e293b', color: '#fff' }}
                 />
               </div>
               <div style={{ flex: 1, marginLeft: 12 }}>
@@ -421,7 +421,7 @@ const BusAdminManager = () => {
                   placeholder="Timing"
                   value={editingBus.timing}
                   onChange={e => setEditingBus({ ...editingBus, timing: e.target.value })}
-                  style={{ width: '100%', padding: 10, borderRadius: 8, border: '1.5px solid #ccc', marginTop: 4, background: '#fff', color: '#222' }}
+                  style={{ width: '100%', padding: 10, borderRadius: 8, border: '1.5px solid #475569', marginTop: 4, background: '#1e293b', color: '#fff' }}
                 />
               </div>
             </div>
@@ -433,7 +433,7 @@ const BusAdminManager = () => {
                 onChange={e => setEditingBus({ ...editingBus, price: Number(e.target.value.replace(/[^0-9.]/g, '')) })}
                 required
                 placeholder="Enter price"
-                style={{ width: '100%', padding: 10, borderRadius: 8, border: '1.5px solid #2563eb', marginBottom: 12, fontSize: 16, color: '#172b4d', background: '#fff' }}
+                style={{ width: '100%', padding: 10, borderRadius: 8, border: '1.5px solid #2563eb', marginBottom: 12, fontSize: 16, color: '#fff', background: '#1e293b' }}
                 inputMode="decimal"
                 pattern="[0-9]*"
                 autoComplete="off"
@@ -462,7 +462,7 @@ const BusAdminManager = () => {
         ) : (
           <form onSubmit={handleAddBus} style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 24, rowGap: 18, alignItems: 'end' }}>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <label style={{ marginBottom: 6, fontWeight: 700, color: '#003366', fontSize: 15 }}>Bus name</label>
+              <label style={{ marginBottom: 6, fontWeight: 700, color: '#94a3b8', fontSize: 15 }}>Bus name</label>
               <input
                 type="text"
                 value={newBus.name}
@@ -473,7 +473,7 @@ const BusAdminManager = () => {
               />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <label style={{ marginBottom: 6, fontWeight: 700, color: '#003366', fontSize: 15 }}>Bus number</label>
+              <label style={{ marginBottom: 6, fontWeight: 700, color: '#94a3b8', fontSize: 15 }}>Bus number</label>
               <input
                 type="text"
                 value={newBus.number}
@@ -484,7 +484,7 @@ const BusAdminManager = () => {
               />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <label style={{ marginBottom: 6, fontWeight: 700, color: '#003366', fontSize: 15 }}>Type</label>
+              <label style={{ marginBottom: 6, fontWeight: 700, color: '#94a3b8', fontSize: 15 }}>Type</label>
               <select
                 value={newBus.type}
                 onChange={e => setNewBus({ ...newBus, type: e.target.value })}
@@ -495,7 +495,7 @@ const BusAdminManager = () => {
               </select>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <label style={{ marginBottom: 6, fontWeight: 700, color: '#003366', fontSize: 15 }}>Capacity</label>
+              <label style={{ marginBottom: 6, fontWeight: 700, color: '#94a3b8', fontSize: 15 }}>Capacity</label>
               <input
                 type="number"
                 value={newBus.capacity}
@@ -507,7 +507,7 @@ const BusAdminManager = () => {
               />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <label style={{ marginBottom: 6, fontWeight: 700, color: '#003366', fontSize: 15 }}>Status</label>
+              <label style={{ marginBottom: 6, fontWeight: 700, color: '#94a3b8', fontSize: 15 }}>Status</label>
               <select
                 value={newBus.status}
                 onChange={e => setNewBus({ ...newBus, status: e.target.value })}
@@ -518,7 +518,7 @@ const BusAdminManager = () => {
               </select>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', position: 'relative' }}>
-              <label style={{ marginBottom: 6, fontWeight: 700, color: '#003366', fontSize: 15 }}>Date</label>
+              <label style={{ marginBottom: 6, fontWeight: 700, color: '#94a3b8', fontSize: 15 }}>Date</label>
               <input
                 type="date"
                 value={newBus.date || ''}
@@ -549,16 +549,16 @@ const BusAdminManager = () => {
               >📅</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gridColumn: 'span 2', position: 'relative' }}>
-              <label style={{ marginBottom: 6, fontWeight: 700, color: '#003366', fontSize: 15 }}>Exams</label>
+              <label style={{ marginBottom: 6, fontWeight: 700, color: '#94a3b8', fontSize: 15 }}>Exams</label>
               <div
                 style={{
-                  background: '#fff',
-                  border: '1.5px solid #d1d5db',
+                  background: '#1e293b',
+                  border: '1.5px solid #475569',
                   borderRadius: 8,
                   minHeight: 44,
                   padding: '10px 12px',
                   fontSize: 16,
-                  color: '#1e293b',
+                  color: '#fff',
                   cursor: 'pointer',
                   userSelect: 'none',
                   position: 'relative',
@@ -567,12 +567,12 @@ const BusAdminManager = () => {
                 tabIndex={0}
               >
                 {newBus.exams.length === 0
-                  ? <span style={{ color: '#64748b' }}>Select exams</span>
+                  ? <span style={{ color: '#94a3b8' }}>Select exams</span>
                   : exams.filter(exam => newBus.exams.includes(exam._id)).map(exam => exam.name).join(', ')
                 }
-                <span style={{ float: 'right', color: '#64748b', fontSize: 18, marginLeft: 8 }}>&#9662;</span>
+                <span style={{ float: 'right', color: '#94a3b8', fontSize: 18, marginLeft: 8 }}>&#9662;</span>
                 {showExamDropdown && (
-                  <div ref={examDropdownRef} style={{ position: 'absolute', top: 44, left: 0, zIndex: 10, background: '#fff', border: '1.5px solid #d1d5db', borderRadius: 8, boxShadow: '0 4px 16px rgba(0,0,0,0.10)', width: '100%', maxHeight: 220, overflowY: 'auto', padding: 8 }}>
+                  <div ref={examDropdownRef} style={{ position: 'absolute', top: 44, left: 0, zIndex: 10, background: '#1e293b', border: '1.5px solid #475569', borderRadius: 8, boxShadow: '0 4px 16px rgba(0,0,0,0.10)', width: '100%', maxHeight: 220, overflowY: 'auto', padding: 8 }}>
                     {exams.map(exam => (
                       <label key={exam._id} style={{ display: 'flex', alignItems: 'center', padding: '6px 8px', cursor: 'pointer', borderRadius: 6, transition: 'background 0.2s', fontSize: 15 }}>
                         <input
@@ -595,7 +595,7 @@ const BusAdminManager = () => {
               </div>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <label style={{ marginBottom: 6, fontWeight: 700, color: '#003366', fontSize: 15 }}>Route From</label>
+              <label style={{ marginBottom: 6, fontWeight: 700, color: '#94a3b8', fontSize: 15 }}>Route From</label>
               <select
                 value={newBus.routeFrom || ''}
                 onChange={e => setNewBus({ ...newBus, routeFrom: e.target.value })}
@@ -603,14 +603,14 @@ const BusAdminManager = () => {
                 required
                 style={inputStyle}
               >
-                <option value="" style={{ color: '#64748b', background: '#fff' }}>Select city</option>
+                <option value="" style={{ color: '#94a3b8', background: '#1e293b' }}>Select city</option>
                 {cities.map(city => (
-                  <option key={city.id || city._id || city.name} value={city.name} style={{ color: '#1e293b', background: '#fff' }}>{city.name}</option>
+                  <option key={city.id || city._id || city.name} value={city.name} style={{ color: '#fff', background: '#1e293b' }}>{city.name}</option>
                 ))}
               </select>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <label style={{ marginBottom: 6, fontWeight: 700, color: '#003366', fontSize: 15 }}>Route To</label>
+              <label style={{ marginBottom: 6, fontWeight: 700, color: '#94a3b8', fontSize: 15 }}>Route To</label>
               <select
                 value={newBus.routeTo || ''}
                 onChange={e => setNewBus({ ...newBus, routeTo: e.target.value })}
@@ -618,9 +618,9 @@ const BusAdminManager = () => {
                 required
                 style={inputStyle}
               >
-                <option value="" style={{ color: '#64748b', background: '#fff' }}>Select city</option>
+                <option value="" style={{ color: '#94a3b8', background: '#1e293b' }}>Select city</option>
                 {cities.map(city => (
-                  <option key={city.id || city._id || city.name} value={city.name} style={{ color: '#1e293b', background: '#fff' }}>{city.name}</option>
+                  <option key={city.id || city._id || city.name} value={city.name} style={{ color: '#fff', background: '#1e293b' }}>{city.name}</option>
                 ))}
               </select>
             </div>
@@ -632,7 +632,7 @@ const BusAdminManager = () => {
                   placeholder="Contact number"
                   value={newBus.contactNumber}
                   onChange={e => setNewBus({ ...newBus, contactNumber: e.target.value })}
-                  style={{ width: '100%', padding: 10, borderRadius: 8, border: '1.5px solid #ccc', marginTop: 4, background: '#fff', color: '#222' }}
+                  style={{ width: '100%', padding: 10, borderRadius: 8, border: '1.5px solid #475569', marginTop: 4, background: '#1e293b', color: '#fff' }}
                 />
               </div>
               <div style={{ flex: 1, marginLeft: 12 }}>
@@ -642,7 +642,7 @@ const BusAdminManager = () => {
                   placeholder="Timing"
                   value={newBus.timing}
                   onChange={e => setNewBus({ ...newBus, timing: e.target.value })}
-                  style={{ width: '100%', padding: 10, borderRadius: 8, border: '1.5px solid #ccc', marginTop: 4, background: '#fff', color: '#222' }}
+                  style={{ width: '100%', padding: 10, borderRadius: 8, border: '1.5px solid #475569', marginTop: 4, background: '#1e293b', color: '#fff' }}
                 />
               </div>
             </div>
@@ -654,7 +654,7 @@ const BusAdminManager = () => {
                 onChange={e => setNewBus({ ...newBus, price: Number(e.target.value.replace(/[^0-9.]/g, '')) })}
                 required
                 placeholder="Enter price"
-                style={{ width: '100%', padding: 10, borderRadius: 8, border: '1.5px solid #2563eb', marginBottom: 12, fontSize: 16, color: '#172b4d', background: '#fff' }}
+                style={{ width: '100%', padding: 10, borderRadius: 8, border: '1.5px solid #2563eb', marginBottom: 12, fontSize: 16, color: '#fff', background: '#1e293b' }}
                 inputMode="decimal"
                 pattern="[0-9]*"
                 autoComplete="off"
@@ -675,10 +675,10 @@ const BusAdminManager = () => {
           </form>
         )}
       </div>
-      <div style={{ background: '#f8fafc', borderRadius: 14, boxShadow: '0 2px 8px rgba(0,0,0,0.04)', maxWidth: 600, margin: '0 auto 36px auto', padding: 24 }}>
+      <div style={{ background: '#334155', borderRadius: 14, boxShadow: '0 2px 8px rgba(0,0,0,0.04)', maxWidth: 600, margin: '0 auto 36px auto', padding: 24, border: '1px solid #475569', color: '#fff' }}>
         <form onSubmit={handleAddExam} style={{ display: 'flex', gap: 18, alignItems: 'flex-end' }}>
           <div style={{ display: 'flex', flexDirection: 'column', minWidth: 220 }}>
-            <label style={{ marginBottom: 4, fontWeight: 700, color: '#003366' }}>Add New Exam</label>
+            <label style={{ marginBottom: 4, fontWeight: 700, color: '#94a3b8' }}>Add New Exam</label>
             <input
               type="text"
               value={newExamName}
@@ -699,49 +699,52 @@ const BusAdminManager = () => {
         </form>
       </div>
       {loading ? (
-        <p>Loading buses...</p>
+        <p style={{ color: '#94a3b8' }}>Loading buses...</p>
       ) : error ? (
-        <p style={{ color: 'red' }}>{error}</p>
+        <p style={{ color: '#ef4444' }}>{error}</p>
       ) : (
-        <div style={{ background: '#fff', borderRadius: 18, boxShadow: '0 4px 24px rgba(0,0,0,0.08)', padding: 24, maxWidth: 1200, margin: '0 auto', overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, minWidth: 1100 }}>
-            <thead style={{ background: '#f4f5f7' }}>
+        <div style={{ background: '#334155', borderRadius: 18, boxShadow: '0 4px 24px rgba(0,0,0,0.08)', padding: 24, maxWidth: 1200, margin: '0 auto', overflowX: 'auto', border: '1px solid #475569', color: '#fff' }}>
+          <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, minWidth: 1100, color: '#fff' }}>
+            <thead style={{ background: '#475569' }}>
               <tr>
-                <th style={{ border: '1px solid #e5e7eb', padding: '14px 10px', fontWeight: 800, fontSize: 16, color: '#003366' }}>ID</th>
-                <th style={{ border: '1px solid #e5e7eb', padding: '14px 10px', fontWeight: 800, fontSize: 16, color: '#003366' }}>Name</th>
-                <th style={{ border: '1px solid #e5e7eb', padding: '14px 10px', fontWeight: 800, fontSize: 16, color: '#003366' }}>Number</th>
-                <th style={{ border: '1px solid #e5e7eb', padding: '14px 10px', fontWeight: 800, fontSize: 16, color: '#003366' }}>Type</th>
-                <th style={{ border: '1px solid #e5e7eb', padding: '14px 10px', fontWeight: 800, fontSize: 16, color: '#003366' }}>Capacity</th>
-                <th style={{ border: '1px solid #e5e7eb', padding: '14px 10px', fontWeight: 800, fontSize: 16, color: '#003366' }}>Status</th>
-                <th style={{ border: '1px solid #e5e7eb', padding: '14px 10px', fontWeight: 800, fontSize: 16, color: '#003366' }}>Exams</th>
-                <th style={{ border: '1px solid #e5e7eb', padding: '14px 10px', fontWeight: 800, fontSize: 16, color: '#003366' }}>Route From</th>
-                <th style={{ border: '1px solid #e5e7eb', padding: '14px 10px', fontWeight: 800, fontSize: 16, color: '#003366' }}>Route To</th>
-                <th style={{ border: '1px solid #e5e7eb', padding: '14px 10px', fontWeight: 800, fontSize: 16, color: '#003366' }}>Date</th>
-                <th style={{ border: '1px solid #e5e7eb', padding: '14px 10px', fontWeight: 800, fontSize: 16, color: '#003366' }}>Contact</th>
-                <th style={{ border: '1px solid #e5e7eb', padding: '14px 10px', fontWeight: 800, fontSize: 16, color: '#003366' }}>Timing</th>
-                <th style={{ border: '1px solid #e5e7eb', padding: '14px 10px', fontWeight: 800, fontSize: 16, color: '#003366' }}>Actions</th>
+                <th style={{ border: '1px solid #334155', padding: '14px 10px', fontWeight: 800, fontSize: 16, color: '#fff' }}>ID</th>
+                <th style={{ border: '1px solid #334155', padding: '14px 10px', fontWeight: 800, fontSize: 16, color: '#fff' }}>Name</th>
+                <th style={{ border: '1px solid #334155', padding: '14px 10px', fontWeight: 800, fontSize: 16, color: '#fff' }}>Number</th>
+                <th style={{ border: '1px solid #334155', padding: '14px 10px', fontWeight: 800, fontSize: 16, color: '#fff' }}>Type</th>
+                <th style={{ border: '1px solid #334155', padding: '14px 10px', fontWeight: 800, fontSize: 16, color: '#fff' }}>Capacity</th>
+                <th style={{ border: '1px solid #334155', padding: '14px 10px', fontWeight: 800, fontSize: 16, color: '#fff' }}>Status</th>
+                <th style={{ border: '1px solid #334155', padding: '14px 10px', fontWeight: 800, fontSize: 16, color: '#fff' }}>Exams</th>
+                <th style={{ border: '1px solid #334155', padding: '14px 10px', fontWeight: 800, fontSize: 16, color: '#fff' }}>Route From</th>
+                <th style={{ border: '1px solid #334155', padding: '14px 10px', fontWeight: 800, fontSize: 16, color: '#fff' }}>Route To</th>
+                <th style={{ border: '1px solid #334155', padding: '14px 10px', fontWeight: 800, fontSize: 16, color: '#fff' }}>Date</th>
+                <th style={{ border: '1px solid #334155', padding: '14px 10px', fontWeight: 800, fontSize: 16, color: '#fff' }}>Contact</th>
+                <th style={{ border: '1px solid #334155', padding: '14px 10px', fontWeight: 800, fontSize: 16, color: '#fff' }}>Timing</th>
+                <th style={{ border: '1px solid #334155', padding: '14px 10px', fontWeight: 800, fontSize: 16, color: '#fff' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {buses.map((bus) => (
-                <tr key={bus._id} style={{ background: '#f9fafb', borderRadius: 8, transition: 'background 0.2s' }}>
-                  <td style={{ border: '1px solid #e5e7eb', padding: '10px' }}>{bus._id}</td>
-                  <td style={{ border: '1px solid #e5e7eb', padding: '10px' }}>{bus.name}</td>
-                  <td style={{ border: '1px solid #e5e7eb', padding: '10px' }}>{bus.number}</td>
-                  <td style={{ border: '1px solid #e5e7eb', padding: '10px' }}>{bus.type}</td>
-                  <td style={{ border: '1px solid #e5e7eb', padding: '10px' }}>{bus.capacity}</td>
-                  <td style={{ border: '1px solid #e5e7eb', padding: '10px' }}>{bus.status}</td>
-                  <td style={{ border: '1px solid #e5e7eb', padding: '10px' }}>
+              {buses.map((bus, idx) => (
+                <tr key={bus._id} style={{ background: idx % 2 === 0 ? '#1e293b' : '#334155', borderRadius: 8, transition: 'background 0.2s' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = '#475569'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = idx % 2 === 0 ? '#1e293b' : '#334155'; }}
+                >
+                  <td style={{ border: '1px solid #475569', padding: '10px' }}>{bus._id}</td>
+                  <td style={{ border: '1px solid #475569', padding: '10px' }}>{bus.name}</td>
+                  <td style={{ border: '1px solid #475569', padding: '10px' }}>{bus.number}</td>
+                  <td style={{ border: '1px solid #475569', padding: '10px' }}>{bus.type}</td>
+                  <td style={{ border: '1px solid #475569', padding: '10px' }}>{bus.capacity}</td>
+                  <td style={{ border: '1px solid #475569', padding: '10px' }}>{bus.status}</td>
+                  <td style={{ border: '1px solid #475569', padding: '10px' }}>
                     {Array.isArray(bus.exams) && bus.exams.length > 0
                       ? bus.exams.map(e => typeof e === 'string' ? exams.find(exam => exam._id === e)?.name || e : e.name).join(', ')
                       : '—'}
                   </td>
-                  <td style={{ border: '1px solid #e5e7eb', padding: '10px' }}>{bus.routeFrom}</td>
-                  <td style={{ border: '1px solid #e5e7eb', padding: '10px' }}>{bus.routeTo}</td>
-                  <td style={{ border: '1px solid #e5e7eb', padding: '10px' }}>{bus.date}</td>
-                  <td style={{ border: '1px solid #e5e7eb', padding: '10px' }}>{bus.contactNumber || '—'}</td>
-                  <td style={{ border: '1px solid #e5e7eb', padding: '10px' }}>{bus.timing || '—'}</td>
-                  <td style={{ border: '1px solid #e5e7eb', padding: '10px' }}>
+                  <td style={{ border: '1px solid #475569', padding: '10px' }}>{bus.routeFrom}</td>
+                  <td style={{ border: '1px solid #475569', padding: '10px' }}>{bus.routeTo}</td>
+                  <td style={{ border: '1px solid #475569', padding: '10px' }}>{bus.date}</td>
+                  <td style={{ border: '1px solid #475569', padding: '10px' }}>{bus.contactNumber || '—'}</td>
+                  <td style={{ border: '1px solid #475569', padding: '10px' }}>{bus.timing || '—'}</td>
+                  <td style={{ border: '1px solid #475569', padding: '10px' }}>
                     <button onClick={() => startEdit(bus)} disabled={actionLoading} style={{ marginRight: 8, padding: '8px 18px', borderRadius: 8, border: 'none', background: '#fbbf24', color: '#222', fontWeight: 700, fontSize: 15, cursor: 'pointer', transition: 'background 0.2s' }}>Edit</button>
                     <button onClick={() => handleDeleteBus(bus._id)} disabled={actionLoading} style={{ padding: '8px 18px', borderRadius: 8, border: 'none', background: '#ef4444', color: '#fff', fontWeight: 700, fontSize: 15, cursor: 'pointer', transition: 'background 0.2s' }}>Delete</button>
                   </td>

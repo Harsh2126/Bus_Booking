@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react';
-import { io, Socket } from 'socket.io-client';
 
 interface Booking { seatNumbers: string[]; userId: string; }
 
 export default function SeatSelector({ userId, busId, capacity, onSelect }: { userId: string, busId: string, capacity: number, onSelect?: (seats: string[]) => void }) {
-  const [socket, setSocket] = useState<Socket | null>(null);
   const [seats, setSeats] = useState<{ [seatId: string]: string | null }>({});
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
 
@@ -27,24 +25,9 @@ export default function SeatSelector({ userId, busId, capacity, onSelect }: { us
       });
   }, [busId]);
 
-  useEffect(() => {
-    const s = io();
-    setSocket(s);
-    s.on('seatUpdate', ({ busId: eventBusId, seatId, userId: seatUserId }) => {
-      if (eventBusId === busId) {
-        setSeats(prev => ({ ...prev, [seatId]: seatUserId }));
-      }
-    });
-    return () => {
-      s.disconnect();
-    };
-  }, [busId]);
-
   const handleSelect = (seatId: string) => {
-    if (!socket) return;
-    if (seats[seatId] && seats[seatId] !== userId) return; // Block if already booked
+    if (seats[seatId] && seats[seatId] !== userId) return;
 
-    // If already selected, deselect
     if (selectedSeats.includes(seatId)) {
       const newSeats = selectedSeats.filter(s => s !== seatId);
       setSelectedSeats(newSeats);
@@ -52,16 +35,14 @@ export default function SeatSelector({ userId, busId, capacity, onSelect }: { us
       return;
     }
 
-    socket.emit('selectSeat', { busId, seatId, userId });
     const newSeats = [...selectedSeats, seatId];
     setSelectedSeats(newSeats);
     if (onSelect) onSelect(newSeats);
   };
 
-  // Render seat grid
   return (
     <div>
-              <h4>Choose your seat(s) (real-time)</h4>
+      <h4>Choose your seat(s)</h4>
       <div style={{ display: 'flex', gap: 16, marginBottom: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <span style={{ display: 'inline-block', width: 22, height: 22, background: '#ffb347', borderRadius: 4, border: '1.5px solid #222' }} /> <span style={{ fontSize: 13 }}>Your seats</span>

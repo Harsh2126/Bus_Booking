@@ -3,7 +3,6 @@ import jsPDF from 'jspdf';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import React, { useContext, useEffect, useState } from 'react';
-import { io } from 'socket.io-client';
 import SeatSelector from '../components/SeatSelector';
 import Spinner from '../components/Spinner';
 import { ThemeContext } from '../ThemeProvider';
@@ -79,7 +78,6 @@ export default function BookExamPage() {
   const [showResults, setShowResults] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [bookingDetails, setBookingDetails] = useState<Booking | null>(null);
-  const [socket, setSocket] = useState<ReturnType<typeof io> | null>(null);
   const [bookingStatus, setBookingStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -135,17 +133,7 @@ export default function BookExamPage() {
           setUser(null);
         }
       });
-    const s = io('http://192.168.56.1:3000');
-    setSocket(s);
-    s.on('bookingUpdate', (booking) => {
-      if (booking && user && booking.userId === user.email) {
-        setBookingStatus('Booking confirmed!');
-      }
-    });
-    return () => {
-      s.disconnect();
-    };
-  }, [user?.email]);
+  }, []);
 
   // Fetch all bookings for selected date, route, and exam when showing results
   useEffect(() => {
@@ -224,9 +212,6 @@ export default function BookExamPage() {
         return;
       }
       const booking = await res.json();
-      if (socket) {
-        socket.emit('bookingUpdate', booking);
-      }
       setBookingStatus('Booking confirmed!');
       setToast('Booking successful!');
       setTimeout(() => setToast(null), 1200);
@@ -293,8 +278,6 @@ export default function BookExamPage() {
       setLoading(false);
     }
   };
-
-
 
   // UPI payment handler
   const handleUPIPayment = async () => {

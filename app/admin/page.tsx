@@ -1,12 +1,25 @@
 "use client";
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function AdminPage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    // Redirect to the admin dashboard
+    router.replace('/dashboard/admin-dashboard');
+  }, [router]);
+
   return (
-    <>
-      <h1 style={{ textAlign: 'center', margin: '32px 0', color: '#003366' }}>Admin Panel</h1>
-      <p style={{ textAlign: 'center', fontSize: 18, color: '#334155' }}>
-        Welcome to the admin dashboard. Use the sidebar to manage buses, cities, users, recommendations, and more.
-      </p>
-    </>
+    <div style={{ 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      minHeight: '50vh',
+      color: '#94a3b8',
+      fontSize: '18px'
+    }}>
+      Redirecting to admin dashboard...
+    </div>
   );
 } 

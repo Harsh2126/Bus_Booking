@@ -9,6 +9,9 @@ export async function GET() {
   const totalUsers = await User.countDocuments();
   const totalAdmins = await User.countDocuments({ role: 'admin' });
 
+  // Count pending bookings
+  const pendingBookings = await Booking.countDocuments({ status: 'pending' });
+
   // Top 3 cities by booking count
   const cityAgg = await Booking.aggregate([
     { $group: { _id: '$city', count: { $sum: 1 } } },
@@ -30,11 +33,20 @@ export async function GET() {
     { $sort: { _id: 1 } }
   ]);
 
+  // Calculate total revenue from confirmed bookings
+  const revenueAgg = await Booking.aggregate([
+    { $match: { status: 'confirmed' } },
+    { $group: { _id: null, total: { $sum: { $multiply: ["$price", { $size: "$seatNumbers" }] } } } }
+  ]);
+  const totalRevenue = revenueAgg[0]?.total || 0;
+
   return NextResponse.json({
     totalBookings,
     totalUsers,
     totalAdmins,
     topCities,
-    bookingsPerDay
+    bookingsPerDay,
+    pendingBookings,
+    totalRevenue
   });
 } 

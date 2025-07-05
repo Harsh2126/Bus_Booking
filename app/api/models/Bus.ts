@@ -1,4 +1,5 @@
 import { model, models, Schema } from 'mongoose';
+import './Exam';
 
 const BusSchema = new Schema({
   name: { type: String, required: true },

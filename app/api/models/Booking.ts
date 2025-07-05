@@ -15,6 +15,7 @@ const BookingSchema = new Schema({
   upiScreenshot: { type: String },
   upiTxnId: { type: String },
   status: { type: String, default: 'confirmed' },
+  price: { type: Number, required: true, default: 0 },
   createdAt: { type: Date, default: Date.now },
 });
 

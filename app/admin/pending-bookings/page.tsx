@@ -64,46 +64,149 @@ export default function PendingBookingsPage() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f8fafc", padding: "48px 0", fontFamily: "Inter, sans-serif" }}>
-      {toast && <div style={{ position: "fixed", top: 32, right: 32, background: "#36b37e", color: "#fff", padding: "12px 28px", borderRadius: 12, fontWeight: 700, zIndex: 1000 }}>{toast}</div>}
-      <div style={{ maxWidth: 800, margin: "0 auto", background: "#fff", borderRadius: 18, padding: "36px 32px", boxShadow: "0 2px 12px rgba(0,0,0,0.10)" }}>
-        <h2 style={{ fontWeight: 800, fontSize: "2rem", marginBottom: 24, textAlign: "center", color: "#2563eb" }}>Pending Bookings</h2>
-        {error && <div style={{ color: "#ff5e62", marginBottom: 16, textAlign: "center" }}>{error}</div>}
+    <div>
+      {toast && (
+        <div style={{ 
+          position: "fixed", 
+          top: 32, 
+          right: 32, 
+          background: "#10b981", 
+          color: "#fff", 
+          padding: "12px 28px", 
+          borderRadius: 12, 
+          fontWeight: 700, 
+          zIndex: 1000,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+        }}>
+          {toast}
+        </div>
+      )}
+      
+      <div style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'space-between', 
+        marginBottom: '24px',
+        padding: '20px',
+        background: '#334155',
+        borderRadius: '12px',
+        border: '1px solid #475569'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <span style={{ fontSize: '24px' }}>⏳</span>
+          <h2 style={{ fontSize: '20px', fontWeight: '600', margin: 0, color: 'white' }}>
+            Pending Bookings
+          </h2>
+        </div>
+      </div>
+
+      <div style={{ 
+        background: '#334155',
+        borderRadius: '16px',
+        border: '1px solid #475569',
+        padding: '32px'
+      }}>
+        {error && (
+          <div style={{ 
+            color: "#ef4444", 
+            marginBottom: '24px', 
+            textAlign: "center",
+            padding: '12px',
+            background: '#7f1d1d',
+            borderRadius: '8px',
+            border: '1px solid #dc2626'
+          }}>
+            {error}
+          </div>
+        )}
+        
         {loading ? (
-          <div style={{ textAlign: "center", margin: 32 }}>Loading...</div>
+          <div style={{ 
+            textAlign: "center", 
+            margin: '32px',
+            color: '#94a3b8',
+            fontSize: '18px'
+          }}>
+            Loading...
+          </div>
         ) : bookings.length === 0 ? (
-          <div style={{ color: "#b23b3b", textAlign: "center", marginTop: 32 }}>No pending bookings.</div>
+          <div style={{ 
+            color: "#94a3b8", 
+            textAlign: "center", 
+            marginTop: '32px',
+            fontSize: '16px'
+          }}>
+            No pending bookings.
+          </div>
         ) : (
           <ul style={{ listStyle: "none", padding: 0 }}>
             {bookings.map((b) => (
-              <li key={b._id} style={{ background: "#f4f5f7", borderRadius: 14, padding: 18, marginBottom: 18 }}>
-                <div><b>User:</b> {b.userId}</div>
-                <div><b>Exam:</b> {b.exam}</div>
-                <div><b>City:</b> {b.city}</div>
-                <div><b>Date:</b> {b.date}</div>
-                <div><b>Bus:</b> {b.bus} {b.busNumber ? `(${b.busNumber})` : ''}</div>
-                <div><b>Route:</b> {b.routeFrom} → {b.routeTo}</div>
-                <div><b>Timing:</b> {b.timing || '-'}</div>
-                <div><b>Contact:</b> {b.contactNumber || '-'}</div>
-                <div><b>Seats:</b> {Array.isArray(b.seatNumbers) ? b.seatNumbers.join(', ') : ''}</div>
-                <div><b>Price per Seat:</b> ₹{b.price || 0}</div>
-                <div><b>Total Price:</b> ₹{(b.price || 0) * (Array.isArray(b.seatNumbers) ? b.seatNumbers.length : 1)}</div>
-                <div><b>UPI Txn ID:</b> {b.upiTxnId || '-'}</div>
+              <li key={b._id} style={{ 
+                background: "#475569", 
+                borderRadius: 14, 
+                padding: '24px', 
+                marginBottom: '18px',
+                border: '1px solid #64748b'
+              }}>
+                <div style={{ color: 'white', marginBottom: '8px' }}><b>User:</b> {b.userId}</div>
+                <div style={{ color: 'white', marginBottom: '8px' }}><b>Exam:</b> {b.exam}</div>
+                <div style={{ color: 'white', marginBottom: '8px' }}><b>City:</b> {b.city}</div>
+                <div style={{ color: 'white', marginBottom: '8px' }}><b>Date:</b> {b.date}</div>
+                <div style={{ color: 'white', marginBottom: '8px' }}><b>Bus:</b> {b.bus} {b.busNumber ? `(${b.busNumber})` : ''}</div>
+                <div style={{ color: 'white', marginBottom: '8px' }}><b>Route:</b> {b.routeFrom} → {b.routeTo}</div>
+                <div style={{ color: 'white', marginBottom: '8px' }}><b>Timing:</b> {b.timing || '-'}</div>
+                <div style={{ color: 'white', marginBottom: '8px' }}><b>Contact:</b> {b.contactNumber || '-'}</div>
+                <div style={{ color: 'white', marginBottom: '8px' }}><b>Seats:</b> {Array.isArray(b.seatNumbers) ? b.seatNumbers.join(', ') : ''}</div>
+                <div style={{ color: 'white', marginBottom: '8px' }}><b>Price per Seat:</b> ₹{b.price || 0}</div>
+                <div style={{ color: 'white', marginBottom: '8px' }}><b>Total Price:</b> ₹{(b.price || 0) * (Array.isArray(b.seatNumbers) ? b.seatNumbers.length : 1)}</div>
+                <div style={{ color: 'white', marginBottom: '8px' }}><b>UPI Txn ID:</b> {b.upiTxnId || '-'}</div>
                 {b.upiScreenshot && (
-                  <div style={{ margin: '10px 0' }}>
-                    <b>Screenshot:</b><br />
-                    <Image src={"/uploads/" + b.upiScreenshot} alt="UPI Screenshot" width={180} height={180} style={{ borderRadius: 8, marginTop: 6 }} />
+                  <div style={{ margin: '16px 0' }}>
+                    <div style={{ color: 'white', marginBottom: '8px' }}><b>Screenshot:</b></div>
+                    <Image 
+                      src={"/uploads/" + b.upiScreenshot} 
+                      alt="UPI Screenshot" 
+                      width={180} 
+                      height={180} 
+                      style={{ borderRadius: 8, marginTop: 6 }} 
+                    />
                   </div>
                 )}
-                <div style={{ marginTop: 12, display: 'flex', gap: 12 }}>
-                  <button onClick={() => handleAction(b._id, "confirmed")}
+                <div style={{ marginTop: '16px', display: 'flex', gap: '12px' }}>
+                  <button 
+                    onClick={() => handleAction(b._id, "confirmed")}
                     disabled={actionLoading === b._id + "confirmed"}
-                    style={{ background: '#36b37e', color: '#fff', border: 'none', borderRadius: 8, padding: '6px 16px', fontWeight: 600, cursor: actionLoading ? 'not-allowed' : 'pointer' }}>
+                    style={{ 
+                      background: '#10b981', 
+                      color: '#fff', 
+                      border: 'none', 
+                      borderRadius: 8, 
+                      padding: '8px 16px', 
+                      fontWeight: 600, 
+                      cursor: actionLoading ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.2s'
+                    }}
+                    onMouseOver={(e) => !actionLoading && (e.currentTarget.style.background = '#059669')}
+                    onMouseOut={(e) => !actionLoading && (e.currentTarget.style.background = '#10b981')}
+                  >
                     Approve
                   </button>
-                  <button onClick={() => handleAction(b._id, "rejected")}
+                  <button 
+                    onClick={() => handleAction(b._id, "rejected")}
                     disabled={actionLoading === b._id + "rejected"}
-                    style={{ background: '#ff5e62', color: '#fff', border: 'none', borderRadius: 8, padding: '6px 16px', fontWeight: 600, cursor: actionLoading ? 'not-allowed' : 'pointer' }}>
+                    style={{ 
+                      background: '#ef4444', 
+                      color: '#fff', 
+                      border: 'none', 
+                      borderRadius: 8, 
+                      padding: '8px 16px', 
+                      fontWeight: 600, 
+                      cursor: actionLoading ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.2s'
+                    }}
+                    onMouseOver={(e) => !actionLoading && (e.currentTarget.style.background = '#dc2626')}
+                    onMouseOut={(e) => !actionLoading && (e.currentTarget.style.background = '#ef4444')}
+                  >
                     Reject
                   </button>
                 </div>

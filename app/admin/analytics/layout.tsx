@@ -1,8 +1,7 @@
 "use client";
-import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useContext, useState } from 'react';
-import { FaBus, FaCalendarAlt, FaChartBar, FaChartLine, FaDollarSign, FaUserCircle, FaUsers } from 'react-icons/fa';
+import { FaBus, FaCalendarAlt, FaChartBar, FaChartLine, FaDollarSign, FaUsers } from 'react-icons/fa';
 import { ThemeContext } from '../../ThemeProvider';
 
 const analyticsNavLinks = [
@@ -70,54 +69,74 @@ export default function AnalyticsLayout({ children }: { children: React.ReactNod
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: theme === 'light' ? palette.bgLight : palette.bgDark, fontFamily: 'Inter, sans-serif', color: theme === 'light' ? palette.textLight : palette.textDark, display: 'flex' }}>
+    <div style={{ 
+      display: 'flex', 
+      minHeight: '100vh', 
+      background: '#0f172a',
+      fontFamily: 'Inter, sans-serif'
+    }}>
       {/* Analytics Sidebar */}
-      <aside style={{ width: 280, background: theme === 'light' ? palette.card : palette.cardDark, boxShadow: '2px 0 12px rgba(0,0,0,0.08)', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 0', position: 'fixed', left: 0, top: 0, bottom: 0, zIndex: 20, transition: 'background 0.2s', overflowY: 'auto', maxHeight: '100vh' }}>
-        <div style={{ fontWeight: 900, fontSize: '1.7rem', marginBottom: 8, letterSpacing: '1px', color: theme === 'light' ? palette.primary : palette.textDark, transition: 'color 0.2s' }}>Smartify</div>
-        <div style={{ fontSize: '0.9rem', color: theme === 'light' ? palette.secondary : '#94a3b8', marginBottom: 32, fontWeight: 500 }}>Analytics Dashboard</div>
+      <div style={{
+        width: '280px',
+        background: '#1e293b',
+        borderRight: '1px solid #334155',
+        padding: '32px 0',
+        position: 'sticky',
+        top: 0,
+        height: '100vh',
+        overflowY: 'auto'
+      }}>
+        <div style={{ padding: '0 24px', marginBottom: '32px' }}>
+          <div style={{ 
+            fontSize: '24px', 
+            fontWeight: '700', 
+            color: 'white',
+            marginBottom: '8px'
+          }}>
+            Analytics
+          </div>
+          <div style={{ fontSize: '14px', color: '#94a3b8' }}>
+            Data Insights Dashboard
+          </div>
+        </div>
         
         {/* Back to Admin Button */}
-        <button 
-          onClick={handleBackToAdmin}
-          style={{ 
-            background: 'none', 
-            border: `2px solid ${palette.primary}`, 
-            color: palette.primary, 
-            borderRadius: 8, 
-            padding: '8px 16px', 
-            fontWeight: 600, 
-            fontSize: 14, 
-            cursor: 'pointer', 
-            marginBottom: 32,
-            transition: 'all 0.2s',
-            width: '80%'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = palette.primary;
-            e.currentTarget.style.color = '#fff';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'none';
-            e.currentTarget.style.color = palette.primary;
-          }}
-        >
-          ← Back to Admin
-        </button>
+        <div style={{ padding: '0 24px', marginBottom: '24px' }}>
+          <button 
+            onClick={handleBackToAdmin}
+            style={{ 
+              width: '100%',
+              padding: '12px 16px', 
+              background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+              color: 'white', 
+              border: 'none', 
+              borderRadius: '8px', 
+              fontWeight: '600', 
+              fontSize: '14px', 
+              cursor: 'pointer', 
+              transition: 'transform 0.2s'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-1px)'}
+            onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+          >
+            ← Back to Admin
+          </button>
+        </div>
 
         {/* Date Range Selector */}
-        <div style={{ width: '100%', padding: '0 24px', marginBottom: 24 }}>
-          <div style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: 8, color: theme === 'light' ? palette.textLight : palette.textDark }}>Date Range</div>
+        <div style={{ padding: '0 24px', marginBottom: '24px' }}>
+          <div style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px', color: '#94a3b8' }}>Date Range</div>
           <select 
             value={dateRange} 
             onChange={(e) => setDateRange(e.target.value)}
             style={{ 
               width: '100%', 
-              padding: '8px 12px', 
-              borderRadius: 6, 
-              border: `1px solid ${theme === 'light' ? '#e2e8f0' : '#475569'}`, 
-              background: theme === 'light' ? '#fff' : palette.cardDark,
-              color: theme === 'light' ? palette.textLight : palette.textDark,
-              fontSize: '0.9rem'
+              padding: '12px', 
+              borderRadius: '8px', 
+              border: '1px solid #475569', 
+              background: '#334155',
+              color: 'white',
+              fontSize: '14px'
             }}
           >
             <option value="1d">Last 24 Hours</option>
@@ -129,69 +148,94 @@ export default function AnalyticsLayout({ children }: { children: React.ReactNod
         </div>
 
         {/* Analytics Navigation */}
-        <nav style={{ width: '100%' }}>
+        <nav>
           {analyticsNavLinks.map(link => {
             const IconComponent = link.icon;
             const isActive = pathname === link.href;
             return (
-              <a 
-                key={link.label} 
-                href={link.href} 
-                style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: 14, 
-                  padding: '14px 24px', 
-                  color: isActive ? palette.primary : (theme === 'light' ? palette.textLight : palette.textDark), 
-                  textDecoration: 'none', 
-                  fontWeight: isActive ? 700 : 600, 
-                  fontSize: 15, 
-                  borderRadius: 10, 
-                  marginBottom: 4, 
-                  transition: 'all 0.2s', 
-                  background: isActive ? `${palette.primary}15` : 'none', 
+              <button
+                key={link.label}
+                onClick={() => router.push(link.href)}
+                style={{
+                  width: '100%',
+                  padding: '16px 24px',
+                  background: isActive ? '#334155' : 'transparent',
+                  border: 'none',
+                  textAlign: 'left',
                   cursor: 'pointer',
-                  borderLeft: isActive ? `3px solid ${palette.primary}` : '3px solid transparent'
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  fontSize: '16px',
+                  color: isActive ? 'white' : '#94a3b8',
+                  fontWeight: isActive ? '600' : '500',
+                  transition: 'all 0.2s'
+                }}
+                onMouseOver={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.background = '#334155';
+                    e.currentTarget.style.color = 'white';
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.background = 'transparent';
+                    e.currentTarget.style.color = '#94a3b8';
+                  }
                 }}
               >
-                <IconComponent style={{ fontSize: 18, color: isActive ? palette.primary : (theme === 'light' ? palette.secondary : '#94a3b8') }} /> 
+                <IconComponent style={{ fontSize: '18px' }} /> 
                 {link.label}
-              </a>
+              </button>
             );
           })}
         </nav>
-
-        {/* Profile Button at Bottom */}
-        <div style={{ flex: 1 }} />
-        <Link 
-          href="/profile" 
-          style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: 12, 
-            padding: '14px 24px', 
-            color: theme === 'light' ? palette.primary : palette.textDark, 
-            textDecoration: 'none', 
-            fontWeight: 700, 
-            fontSize: 16, 
-            borderRadius: 10, 
-            marginBottom: 12, 
-            marginTop: 24, 
-            background: pathname === '/profile' ? palette.accent + '22' : 'none', 
-            transition: 'background 0.2s, color 0.2s',
-            width: '100%'
-          }}
-        >
-          <FaUserCircle style={{ fontSize: 24 }} /> Profile
-        </Link>
-      </aside>
+      </div>
 
       {/* Main Content Area */}
-      <div style={{ flex: 1, marginLeft: 280, minHeight: '100vh', display: 'flex', flexDirection: 'column', transition: 'margin 0.2s' }}>
-        {/* Main Content Scrollable */}
-        <main style={{ flex: 1, padding: '40px 40px 32px 40px', maxWidth: 1400, margin: '0 auto', width: '100%', transition: 'padding 0.2s' }}>
+      <div style={{
+        flex: 1,
+        padding: '32px',
+        overflowY: 'auto'
+      }}>
+        {/* Page Header */}
+        <div style={{
+          background: '#1e293b',
+          borderRadius: '20px',
+          padding: '32px',
+          marginBottom: '32px',
+          border: '1px solid #334155'
+        }}>
+          <h1 style={{ 
+            margin: 0, 
+            fontSize: '32px', 
+            fontWeight: '700',
+            color: 'white',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px'
+          }}>
+            Analytics Dashboard
+          </h1>
+          <p style={{ 
+            margin: '8px 0 0 0', 
+            color: '#94a3b8',
+            fontSize: '16px'
+          }}>
+            Comprehensive insights into your bus booking system
+          </p>
+        </div>
+
+        {/* Page Content */}
+        <div style={{
+          background: '#1e293b',
+          borderRadius: '20px',
+          padding: '32px',
+          border: '1px solid #334155',
+          minHeight: 'calc(100vh - 200px)'
+        }}>
           {children}
-        </main>
+        </div>
       </div>
     </div>
   );

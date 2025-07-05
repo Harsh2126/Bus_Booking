@@ -1,14 +1,14 @@
 "use client";
 import { useEffect, useState } from 'react';
-import AdminBookingManager from '../../components/AdminBookingManager';
+import AdminUserManager from '../../components/AdminUserManager';
 
-export default function AdminBookingsPage() {
+export default function AdminUsersPage() {
   const [total, setTotal] = useState<number | null>(null);
 
   useEffect(() => {
-    fetch('/api/bookings/all')
+    fetch('/api/users')
       .then(res => res.json())
-      .then(data => setTotal(data.bookings?.length || 0));
+      .then(data => setTotal(data.users?.length || 0));
   }, []);
 
   return (
@@ -24,9 +24,9 @@ export default function AdminBookingsPage() {
         border: '1px solid #475569'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <span style={{ fontSize: '24px' }}>📋</span>
+          <span style={{ fontSize: '24px' }}>👥</span>
           <h2 style={{ fontSize: '20px', fontWeight: '600', margin: 0, color: 'white' }}>
-            Booking Management
+            User Management
           </h2>
         </div>
         <div style={{ 
@@ -44,8 +44,8 @@ export default function AdminBookingsPage() {
         border: '1px solid #475569',
         overflow: 'hidden'
       }}>
-        <AdminBookingManager />
+        <AdminUserManager />
       </div>
     </div>
   );
-}
+} 

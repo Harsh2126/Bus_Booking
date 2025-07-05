@@ -6,14 +6,13 @@ import { FaUserCircle } from 'react-icons/fa';
 import { ThemeContext } from '../ThemeProvider';
 
 const adminNavLinks = [
-  { label: 'Dashboard', href: '/dashboard', icon: '🏠' },
-  { label: 'Users', href: '/dashboard#users', icon: '👤' },
-  { label: 'Booking Management', href: '/admin/bookings', icon: '🚌' },
-  { label: 'Add Recommendation', href: '/admin/recommendations/add', icon: '💡' },
-  { label: 'Analytics', href: '/admin/analytics', icon: '📊' },
+  { label: 'Dashboard', href: '/dashboard/admin-dashboard', icon: '📊' },
+  { label: 'User Management', href: '/admin/users', icon: '👥' },
+  { label: 'Booking Management', href: '/admin/bookings', icon: '📋' },
   { label: 'Bus Management', href: '/admin/buses', icon: '🚌' },
-  { label: 'City Management', href: '/admin/cities', icon: '🏙️' },
-  { label: 'Recommendations', href: '/dashboard#recommendations', icon: '⭐' },
+  { label: 'City Management', href: '/admin/cities', icon: '🌆' },
+  { label: 'Analytics', href: '/admin/analytics', icon: '📈' },
+  { label: 'Recommendations', href: '/admin/recommendations', icon: '⭐' },
 ];
 
 const palettes = {
@@ -67,44 +66,171 @@ export default function AdminLayout({ children, pageTitle }: { children: React.R
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: theme === 'light' ? palette.bgLight : palette.bgDark, fontFamily: 'Inter, sans-serif', color: theme === 'light' ? palette.textLight : palette.textDark, display: 'flex' }}>
+    <div style={{ 
+      display: 'flex', 
+      minHeight: '100vh', 
+      background: '#0f172a',
+      fontFamily: 'Inter, sans-serif'
+    }}>
       {/* Sidebar */}
-      <aside style={{ width: 240, background: theme === 'light' ? palette.card : palette.cardDark, boxShadow: '2px 0 12px rgba(0,0,0,0.08)', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 0', position: 'fixed', left: 0, top: 0, bottom: 0, zIndex: 20, transition: 'background 0.2s', overflowY: 'auto', maxHeight: '100vh' }}>
-        <div style={{ fontWeight: 900, fontSize: '1.7rem', marginBottom: 40, letterSpacing: '1px', color: theme === 'light' ? palette.primary : palette.textDark, transition: 'color 0.2s' }}>Smartify</div>
-        <nav style={{ width: '100%' }}>
-          {adminNavLinks.map(link => (
-            <a key={link.label} href={link.href} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 36px', color: theme === 'light' ? palette.textLight : palette.textDark, textDecoration: 'none', fontWeight: 600, fontSize: 17, borderRadius: 10, marginBottom: 8, transition: 'background 0.2s, color 0.2s', background: pathname === link.href ? palette.accent + '22' : 'none', cursor: 'pointer' }}>
-              <span style={{ fontSize: 22 }}>{link.icon}</span> {link.label}
-            </a>
+      <div style={{
+        width: '280px',
+        background: '#1e293b',
+        borderRight: '1px solid #334155',
+        padding: '32px 0',
+        position: 'sticky',
+        top: 0,
+        height: '100vh',
+        overflowY: 'auto'
+      }}>
+        <div style={{ padding: '0 24px', marginBottom: '32px' }}>
+          <div style={{ 
+            fontSize: '24px', 
+            fontWeight: '700', 
+            color: 'white',
+            marginBottom: '8px'
+          }}>
+            Admin Panel
+          </div>
+          <div style={{ fontSize: '14px', color: '#94a3b8' }}>
+            Bus Booking System
+          </div>
+        </div>
+
+        <nav>
+          {adminNavLinks.map((item) => (
+            <button
+              key={item.label}
+              onClick={() => router.push(item.href)}
+              style={{
+                width: '100%',
+                padding: '16px 24px',
+                background: pathname === item.href ? '#334155' : 'transparent',
+                border: 'none',
+                textAlign: 'left',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                fontSize: '16px',
+                color: pathname === item.href ? 'white' : '#94a3b8',
+                fontWeight: pathname === item.href ? '600' : '500',
+                transition: 'all 0.2s'
+              }}
+              onMouseOver={(e) => {
+                if (pathname !== item.href) {
+                  e.currentTarget.style.background = '#334155';
+                  e.currentTarget.style.color = 'white';
+                }
+              }}
+              onMouseOut={(e) => {
+                if (pathname !== item.href) {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = '#94a3b8';
+                }
+              }}
+            >
+              <div style={{ fontSize: '20px' }}>{item.icon}</div>
+              <div>{item.label}</div>
+            </button>
           ))}
         </nav>
-        {/* Profile Button at Bottom */}
+
+        {/* Profile and Logout at bottom */}
         <div style={{ flex: 1 }} />
-        <Link href="/profile" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 36px', color: theme === 'light' ? palette.primary : palette.textDark, textDecoration: 'none', fontWeight: 700, fontSize: 18, borderRadius: 10, marginBottom: 12, marginTop: 24, background: pathname === '/profile' ? palette.accent + '22' : 'none', transition: 'background 0.2s, color 0.2s' }}>
-          <FaUserCircle style={{ fontSize: 26 }} /> Profile
+        <div style={{ padding: '0 24px', marginTop: '32px' }}>
+          <Link href="/profile" style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            padding: '16px 24px',
+            color: '#94a3b8',
+            textDecoration: 'none',
+            fontWeight: '500',
+            fontSize: '16px',
+            borderRadius: '8px',
+            transition: 'all 0.2s',
+            marginBottom: '12px'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.background = '#334155';
+            e.currentTarget.style.color = 'white';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.background = 'transparent';
+            e.currentTarget.style.color = '#94a3b8';
+          }}
+          >
+            <FaUserCircle style={{ fontSize: '20px' }} />
+            <div>Profile</div>
         </Link>
-      </aside>
-      {/* Main Content Area */}
-      <div style={{ flex: 1, marginLeft: 240, minHeight: '100vh', display: 'flex', flexDirection: 'column', transition: 'margin 0.2s' }}>
-        {/* Header Bar */}
-        <header style={{ width: '100%', background: theme === 'light' ? palette.card : palette.cardDark, boxShadow: '0 2px 8px rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 40px', height: 72, position: 'sticky', top: 0, zIndex: 15 }}>
-          <div style={{ fontWeight: 700, fontSize: 20, color: theme === 'light' ? palette.primary : palette.textDark, letterSpacing: '1px' }}>{pageTitle || 'Admin'}</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
-            <button onClick={toggleTheme} style={{ background: 'none', border: 'none', color: theme === 'light' ? palette.primary : palette.textDark, fontSize: 22, cursor: 'pointer', borderRadius: 8, padding: 6, transition: 'background 0.2s' }}>{theme === 'light' ? '🌙' : '☀️'}</button>
-            <Link href="/profile" title="Profile" style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-            <FaUserCircle style={{ fontSize: 32, color: theme === 'light' ? palette.primary : palette.textDark, marginLeft: 8 }} />
-            </Link>
-            <button onClick={handleLogout} style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 18px', fontWeight: 700, fontSize: 15, cursor: 'pointer', marginLeft: 16 }}>Logout</button>
+          
+          <button 
+            onClick={handleLogout}
+            style={{
+              width: '100%',
+              padding: '16px 24px',
+              background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '16px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'transform 0.2s'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-1px)'}
+            onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div style={{
+        flex: 1,
+        padding: '32px',
+        overflowY: 'auto'
+      }}>
+        {/* Page Header */}
+        <div style={{
+          background: '#1e293b',
+          borderRadius: '20px',
+          padding: '32px',
+          marginBottom: '32px',
+          border: '1px solid #334155'
+        }}>
+          <h1 style={{ 
+            margin: 0, 
+            fontSize: '32px', 
+            fontWeight: '700',
+            color: 'white',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px'
+          }}>
+            {pageTitle || 'Admin Panel'}
+          </h1>
+          <p style={{ 
+            margin: '8px 0 0 0', 
+            color: '#94a3b8',
+            fontSize: '16px'
+          }}>
+            Manage your bus booking system
+          </p>
           </div>
-        </header>
-        {/* Main Content Scrollable */}
-        <main style={{ flex: 1, padding: '40px 40px 32px 40px', maxWidth: 1200, margin: '0 auto', width: '100%', transition: 'padding 0.2s' }}>
+
+        {/* Page Content */}
+        <div style={{
+          background: '#1e293b',
+          borderRadius: '20px',
+          padding: '32px',
+          border: '1px solid #334155',
+          minHeight: 'calc(100vh - 200px)'
+        }}>
           {children}
-        </main>
-        {/* Footer */}
-        <footer style={{ background: theme === 'light' ? palette.bgLight : palette.bgDark, padding: '32px 0', textAlign: 'center', color: theme === 'light' ? palette.primary : palette.textDark, fontSize: '1rem', letterSpacing: '0.5px', marginTop: 48 }}>
-          &copy; {new Date().getFullYear()} Smartify Admin Dashboard
-        </footer>
+        </div>
       </div>
     </div>
   );
