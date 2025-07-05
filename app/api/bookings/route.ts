@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
   if (date) query.date = date;
   
   const bookings = await Booking.find(query);
-  return NextResponse.json(bookings);
+  return NextResponse.json({ bookings });
 }
 
 // POST /api/bookings

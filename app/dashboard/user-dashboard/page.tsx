@@ -142,7 +142,27 @@ export default function UserDashboard() {
         </p>
       </div>
 
-      {/* Stats Grid removed as requested */}
+      {/* Booking Count Card */}
+      <div style={{
+        background: 'white',
+        borderRadius: '16px',
+        padding: '24px',
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)',
+        border: '1px solid #e2e8f0',
+        marginBottom: '32px',
+        maxWidth: 320,
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        textAlign: 'center'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
+          <div style={{ fontSize: '24px', marginRight: '12px' }}>🎫</div>
+          <div style={{ fontSize: '14px', color: '#64748b', fontWeight: '500' }}>TOTAL BOOKINGS</div>
+        </div>
+        <div style={{ fontSize: '32px', fontWeight: '700', color: '#1e293b' }}>
+          {bookings.length}
+        </div>
+      </div>
 
       {/* Quick Actions */}
       <div style={{

@@ -93,10 +93,10 @@ export default function BookingsPage() {
           setUser(data.user);
           
           // Fetch bookings
-          fetch(`/api/bookings?userId=${data.user.userId || data.user.email}`)
+          fetch(`/api/bookings?userId=${data.user.userId}`)
             .then(res => res.json())
             .then(data => {
-              if (Array.isArray(data)) setBookings(data);
+              if (Array.isArray(data.bookings)) setBookings(data.bookings);
             });
             
           // Fetch buses
@@ -123,10 +123,10 @@ export default function BookingsPage() {
     if (!user) return;
     
     const interval = setInterval(() => {
-      fetch(`/api/bookings?userId=${user.userId || user.email}`)
+      fetch(`/api/bookings?userId=${user.userId}`)
         .then(res => res.json())
         .then(data => {
-          if (Array.isArray(data)) setBookings(data);
+          if (Array.isArray(data.bookings)) setBookings(data.bookings);
         });
     }, 5000); // Refresh every 5 seconds
 
@@ -156,18 +156,49 @@ export default function BookingsPage() {
 
   const handleDownload = (booking: Booking) => {
     const doc = new jsPDF();
-    doc.setFontSize(16);
-    doc.text('Bus Booking Ticket', 10, 20);
+    
+    // Header
+    doc.setFontSize(20);
+    doc.setTextColor(37, 99, 235);
+    doc.text('Bus Ticket Invoice', 10, 22);
+    doc.setDrawColor(37, 99, 235);
+    doc.line(10, 28, 200, 28);
+
+    // Ticket Details (table-like)
     doc.setFontSize(12);
-    doc.text(`Exam: ${booking.exam || ''}`, 10, 40);
-    doc.text(`City: ${booking.city || ''}`, 10, 50);
-    doc.text(`Date: ${booking.date || ''}`, 10, 60);
-    doc.text(`Bus: ${booking.bus || ''} ${booking.busNumber ? `(${booking.busNumber})` : ''}`, 10, 70);
-    doc.text(`Route: ${booking.routeFrom || ''} → ${booking.routeTo || ''}`, 10, 80);
-    doc.text(`Timing: ${booking.timing || '-'}`, 10, 90);
-    doc.text(`Contact: ${booking.contactNumber || '-'}`, 10, 100);
-    doc.text(`Seats: ${Array.isArray(booking.seatNumbers) ? booking.seatNumbers.join(', ') : ''}`, 10, 110);
-    doc.text('Thank you for booking!', 10, 120);
+    doc.setTextColor(40, 40, 40);
+    let y = 38;
+    const details = [
+      ['Bus:', `${(booking.bus || '').replace(/'/g, '')} ${(booking.busNumber ? `(${booking.busNumber.replace(/'/g, '')})` : '')}`],
+      ['Route:', `${(booking.routeFrom || '').replace(/'/g, '')} ---> ${(booking.routeTo || '').replace(/'/g, '')}`],
+      ['Date:', `${(booking.date || '').replace(/'/g, '')}`],
+      ['Timing:', `${(booking.timing || '-').replace(/'/g, '')}`],
+      ['Contact:', `${(booking.contactNumber || '-').replace(/'/g, '')}`],
+      ['Seat No:', `${Array.isArray(booking.seatNumbers) ? booking.seatNumbers.map(s => s.replace(/'/g, '')).join(', ') : ''}`],
+      ['Price per Seat:', `Rs. ${(booking.price || 0)}`],
+      ['Total Price:', `Rs. ${(booking.price || 0) * (Array.isArray(booking.seatNumbers) ? booking.seatNumbers.length : 1)}`],
+      ['Status:', (booking.status || '').replace(/'/g, '')]
+    ];
+    details.forEach((item) => {
+      const label: string = item[0] != null ? String(item[0]) : '';
+      const value: string = item[1] != null ? String(item[1]) : '';
+      doc.setFont('helvetica', 'bold');
+      doc.text(label as string, 15, y);
+      doc.setFont('helvetica', 'normal');
+      doc.text(value as string, 60, y);
+      y += 9;
+    });
+
+    // Footer
+    y += 8;
+    doc.setDrawColor(251, 191, 36); // Yellow accent
+    doc.line(10, y, 200, y);
+    y += 8;
+    doc.setFontSize(11);
+    doc.setTextColor(120, 120, 120);
+    doc.text('Thank you for booking with BusBooking!', 10, y);
+    doc.text('For support: support@busbooking.com', 10, y + 8);
+
     doc.save('ticket.pdf');
     setToast('Ticket downloaded!');
     setTimeout(() => setToast(null), 2000);
@@ -257,9 +288,9 @@ export default function BookingsPage() {
               <div><b>Route:</b> {b.routeFrom} → {b.routeTo}</div>
               <div><b>Timing:</b> {b.timing || '-'}</div>
               <div><b>Contact:</b> {b.contactNumber || '-'}</div>
-              <div><b>Seats:</b> {Array.isArray(b.seatNumbers) ? b.seatNumbers.join(', ') : ''}</div>
-              <div><b>Price per Seat:</b> ₹{b.price || 0}</div>
-              <div><b>Total Price:</b> ₹{(b.price || 0) * (Array.isArray(b.seatNumbers) ? b.seatNumbers.length : 1)}</div>
+              <div><b>Seat No:</b> {Array.isArray(b.seatNumbers) ? b.seatNumbers.join(', ') : ''}</div>
+              <div><b>Price per Seat:</b> Rs. {b.price || 0}</div>
+              <div><b>Total Price:</b> Rs. {(b.price || 0) * (Array.isArray(b.seatNumbers) ? b.seatNumbers.length : 1)}</div>
               <div style={{ marginTop: 12, display: 'flex', gap: 12 }}>
                 <button
                   onClick={() => handleDownload(b)}
