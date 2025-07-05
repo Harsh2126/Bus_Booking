@@ -1,7 +1,6 @@
 "use client";
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import AdminLayout from '../../components/AdminLayout';
 
 interface Analytics {
   totalBookings: number;
@@ -35,14 +34,14 @@ export default function AdminAnalyticsPage() {
   }, [router]);
 
   return (
-    <AdminLayout pageTitle="Analytics">
+    <>
       {loading ? (
-        <div style={{ marginTop: 64, textAlign: 'center' }}>Loading analytics...</div>
+        <div style={{ textAlign: 'center', padding: '40px' }}>Loading analytics...</div>
       ) : error ? (
-        <div style={{ color: '#ff5e62', marginTop: 64, textAlign: 'center' }}>{error}</div>
+        <div style={{ color: '#ff5e62', textAlign: 'center', padding: '40px' }}>{error}</div>
       ) : !analytics ? null : (
         <>
-          <h1 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: 32 }}>Admin Analytics</h1>
+          <h1 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: 32 }}>Analytics Overview</h1>
           <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap', marginBottom: 32 }}>
             <StatCard label="Total Bookings" value={analytics.totalBookings} />
             <StatCard label="Total Users" value={analytics.totalUsers} />
@@ -53,7 +52,7 @@ export default function AdminAnalyticsPage() {
           <BookingsChart data={analytics.bookingsPerDay} />
         </>
       )}
-    </AdminLayout>
+    </>
   );
 }
 

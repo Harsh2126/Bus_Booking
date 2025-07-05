@@ -252,7 +252,7 @@ export default function BookExamPage() {
       return;
     }
     const busObj = buses.find(b => b._id === busToBook?._id);
-    const amount = 50000; // 500 INR in paise (for demo, make dynamic as needed)
+    const amount = busObj?.price ? busObj.price * 100 : 50000; // Convert price to paise
     try {
       // 1. Create order on backend
       const orderRes = await fetch('/api/payment/order', {

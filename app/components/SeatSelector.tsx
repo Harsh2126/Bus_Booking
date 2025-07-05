@@ -61,7 +61,7 @@ export default function SeatSelector({ userId, busId, capacity, onSelect }: { us
   // Render seat grid
   return (
     <div>
-      <h4>Choose your seat(s) (real-time demo)</h4>
+              <h4>Choose your seat(s) (real-time)</h4>
       <div style={{ display: 'flex', gap: 16, marginBottom: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <span style={{ display: 'inline-block', width: 22, height: 22, background: '#ffb347', borderRadius: 4, border: '1.5px solid #222' }} /> <span style={{ fontSize: 13 }}>Your seats</span>

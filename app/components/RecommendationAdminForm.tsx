@@ -116,8 +116,7 @@ export default function RecommendationAdminForm() {
   const getIcon = (icon: string) => (icon && icon.length <= 2 ? icon : '💡');
 
   return (
-    <div style={{ background: '#fff', borderRadius: 18, padding: 32, boxShadow: '0 2px 12px rgba(0,0,0,0.10)', marginBottom: 32, maxWidth: 700, margin: '0 auto' }}>
-      {/* Removed lower Add Recommendation header for cleaner UI */}
+    <div style={{ background: '#fff', borderRadius: 18, padding: 32, boxShadow: '0 2px 12px rgba(0,0,0,0.10)', marginBottom: 32, maxWidth: 700, margin: '0 auto', fontFamily: 'Inter, sans-serif' }}>
       <form onSubmit={handleSubmit} style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center', marginBottom: 24, background: '#f8fafc', borderRadius: 12, padding: 20, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 80 }}>
           <label style={{ fontWeight: 600, marginBottom: 4 }}>Icon</label>
@@ -160,19 +159,23 @@ export default function RecommendationAdminForm() {
           />
         </div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginTop: 18 }}>
-          <button type="submit" disabled={loading} style={{ padding: '10px 28px', borderRadius: 10, background: '#36b37e', color: '#fff', fontWeight: 700, fontSize: 16, border: 'none', boxShadow: '0 2px 8px rgba(54,179,126,0.10)', cursor: loading ? 'not-allowed' : 'pointer' }}>{editingId ? 'Update' : 'Add'}</button>
-          {editingId && <button type="button" onClick={() => { setEditingId(null); setForm({ icon: '💡', route: '', desc: '', date: '' }); }} style={{ padding: '10px 18px', borderRadius: 10, background: '#aaa', color: '#fff', fontWeight: 700, fontSize: 16, border: 'none' }}>Cancel</button>}
+          <button type="submit" disabled={loading} style={{ padding: '10px 28px', borderRadius: 10, background: '#36b37e', color: '#fff', fontWeight: 700, fontSize: 16, border: 'none', boxShadow: '0 2px 8px rgba(54,179,126,0.10)', cursor: loading ? 'not-allowed' : 'pointer', transition: 'background 0.2s, box-shadow 0.2s', outline: 'none' }}>{editingId ? 'Update' : 'Add'}</button>
+          {editingId && <button type="button" onClick={() => { setEditingId(null); setForm({ icon: '💡', route: '', desc: '', date: '' }); }} style={{ padding: '10px 18px', borderRadius: 10, background: '#aaa', color: '#fff', fontWeight: 700, fontSize: 16, border: 'none', transition: 'background 0.2s', outline: 'none' }}>Cancel</button>}
         </div>
       </form>
       {error && <div style={{ color: '#ff5e62', marginBottom: 8 }}>{error}</div>}
-      <div style={{ marginTop: 24 }}>
+      <hr style={{ border: 'none', borderTop: '1.5px solid #e5e7eb', margin: '32px 0 24px 0' }} />
+      <div style={{ marginTop: 0 }}>
         <h4 style={{ fontWeight: 800, fontSize: 20, color: '#2563eb', marginBottom: 18 }}>Current Recommendations</h4>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
           {recommendations.length === 0 && <div style={{ color: '#64748b', fontSize: 16 }}>No recommendations yet.</div>}
           {recommendations.map(rec => {
             const bus = buses.find(b => b._id === rec.route);
             return (
-              <div key={rec._id} style={{ display: 'flex', alignItems: 'center', gap: 18, background: '#f8fafc', borderRadius: 14, padding: 18, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+              <div key={rec._id} style={{ display: 'flex', alignItems: 'center', gap: 18, background: '#f8fafc', borderRadius: 14, padding: 18, boxShadow: '0 1px 8px rgba(0,0,0,0.06)', transition: 'box-shadow 0.2s, transform 0.2s', cursor: 'pointer', border: '1.5px solid #e5e7eb', position: 'relative' }}
+                onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 4px 24px rgba(37,99,235,0.10)'; e.currentTarget.style.transform = 'translateY(-2px) scale(1.01)'; }}
+                onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 1px 8px rgba(0,0,0,0.06)'; e.currentTarget.style.transform = 'none'; }}
+              >
                 <span style={{ fontSize: 32 }}>{getIcon(rec.icon)}</span>
                 <div style={{ flex: 2 }}>
                   <div style={{ fontWeight: 700, color: '#2563eb', fontSize: 18 }}>{bus ? `${bus.name} (${bus.number})` : rec.route}</div>
@@ -181,8 +184,8 @@ export default function RecommendationAdminForm() {
                   {rec.date && <span style={{ display: 'inline-block', marginTop: 6, background: '#e0e7ef', color: '#2563eb', borderRadius: 8, padding: '2px 10px', fontWeight: 600, fontSize: 14 }}>📅 {rec.date}</span>}
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  <button onClick={() => handleEdit(rec)} style={{ background: '#fbbf24', color: '#222', border: 'none', borderRadius: 8, padding: '8px 18px', fontWeight: 700, fontSize: 15, cursor: 'pointer', marginBottom: 4 }}>Edit</button>
-                  <button onClick={() => handleDelete(rec._id!)} style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 18px', fontWeight: 700, fontSize: 15, cursor: 'pointer' }}>Delete</button>
+                  <button onClick={() => handleEdit(rec)} style={{ background: '#fbbf24', color: '#222', border: 'none', borderRadius: 8, padding: '8px 18px', fontWeight: 700, fontSize: 15, cursor: 'pointer', marginBottom: 4, boxShadow: '0 1px 4px rgba(251,191,36,0.10)', transition: 'background 0.2s, box-shadow 0.2s' }}>Edit</button>
+                  <button onClick={() => handleDelete(rec._id!)} style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 18px', fontWeight: 700, fontSize: 15, cursor: 'pointer', boxShadow: '0 1px 4px rgba(239,68,68,0.10)', transition: 'background 0.2s, box-shadow 0.2s' }}>Delete</button>
                 </div>
               </div>
             );

@@ -22,7 +22,7 @@ app.prepare().then(() => {
     }
   });
 
-  // In-memory state for demo
+  // In-memory state for real-time features
   let seatStatus = {}; // { busId: { seatId: userId } }
   let bookings = [];
   let notifications = [];

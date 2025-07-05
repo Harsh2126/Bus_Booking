@@ -90,75 +90,86 @@ export default function AdminBookingManager() {
   const statuses = Array.from(new Set(bookings.map(b => b.status)));
 
   return (
-    <div style={{ background: 'rgba(255,255,255,0.08)', borderRadius: 16, padding: 24, marginBottom: 32 }}>
-      <h3 style={{ color: theme === 'light' ? '#172b4d' : '#fff', marginBottom: 16 }}>Booking Management</h3>
+    <div style={{ background: '#fff', borderRadius: 18, padding: 32, marginBottom: 32, boxShadow: '0 2px 12px rgba(0,0,0,0.10)', maxWidth: 1300, margin: '0 auto', fontFamily: 'Inter, sans-serif' }}>
+      <h3 style={{ color: theme === 'light' ? '#172b4d' : '#fff', marginBottom: 24, fontWeight: 800, fontSize: 28, letterSpacing: 0.5, display: 'flex', alignItems: 'center', gap: 12 }}>
+        <span style={{ fontSize: 32 }}>🚌</span> Booking Management
+      </h3>
       {error && <div style={{ color: '#ff5e62', marginBottom: 8 }}>{error}</div>}
-      <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
-        <input placeholder="Search by user email" value={search} onChange={e => setSearch(e.target.value)} style={{ padding: 6, borderRadius: 6, border: '1px solid #ccc' }} />
-        <select value={city} onChange={e => setCity(e.target.value)} style={{ padding: 6, borderRadius: 6 }}>
+      <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap', alignItems: 'center' }}>
+        <input placeholder="Search by user email" value={search} onChange={e => setSearch(e.target.value)} style={{ padding: '10px 16px', borderRadius: 8, border: '1.5px solid #d1d5db', fontSize: 16, minWidth: 180, background: '#f8fafc', transition: 'border 0.2s' }} />
+        <select value={city} onChange={e => setCity(e.target.value)} style={{ padding: '10px 16px', borderRadius: 8, border: '1.5px solid #d1d5db', fontSize: 16, background: '#f8fafc', minWidth: 140, transition: 'border 0.2s' }}>
           <option value="">All Cities</option>
           {cities.map(c => <option key={c} value={c}>{c}</option>)}
         </select>
-        <select value={status} onChange={e => setStatus(e.target.value)} style={{ padding: 6, borderRadius: 6 }}>
+        <select value={status} onChange={e => setStatus(e.target.value)} style={{ padding: '10px 16px', borderRadius: 8, border: '1.5px solid #d1d5db', fontSize: 16, background: '#f8fafc', minWidth: 140, transition: 'border 0.2s' }}>
           <option value="">All Statuses</option>
           {statuses.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
-        <input type="date" value={date} onChange={e => setDate(e.target.value)} style={{ padding: 6, borderRadius: 6 }} />
-        <button onClick={() => { setSearch(''); setCity(''); setStatus(''); setDate(''); }} style={{ padding: 6, borderRadius: 6, background: '#aaa', color: '#fff', border: 'none' }}>Clear</button>
+        <input type="date" value={date} onChange={e => setDate(e.target.value)} style={{ padding: '10px 16px', borderRadius: 8, border: '1.5px solid #d1d5db', fontSize: 16, background: '#f8fafc', minWidth: 160, transition: 'border 0.2s' }} />
+        <button onClick={() => { setSearch(''); setCity(''); setStatus(''); setDate(''); }} style={{ padding: '10px 18px', borderRadius: 8, background: '#aaa', color: '#fff', border: 'none', fontWeight: 700, fontSize: 16, transition: 'background 0.2s', cursor: 'pointer' }}>Clear</button>
       </div>
-      {loading ? <div style={{ color: theme === 'light' ? '#003366' : '#ffeaea' }}>Loading...</div> : (
-        <table style={{ width: '100%', color: theme === 'light' ? '#172b4d' : '#fff', borderCollapse: 'collapse', fontSize: 14 }}>
-          <thead>
-            <tr style={{ background: theme === 'light' ? '#e0e7ef' : 'rgba(0,0,0,0.10)' }}>
-              <th style={{ padding: 8, color: theme === 'light' ? '#172b4d' : '#fff' }}>User</th>
-              <th style={{ padding: 8, color: theme === 'light' ? '#172b4d' : '#fff' }}>Exam</th>
-              <th style={{ padding: 8, color: theme === 'light' ? '#172b4d' : '#fff' }}>City</th>
-              <th style={{ padding: 8, color: theme === 'light' ? '#172b4d' : '#fff' }}>Date</th>
-              <th style={{ padding: 8, color: theme === 'light' ? '#172b4d' : '#fff' }}>Bus</th>
-              <th style={{ padding: 8, color: theme === 'light' ? '#172b4d' : '#fff' }}>Seats</th>
-              <th style={{ padding: 8, color: theme === 'light' ? '#172b4d' : '#fff' }}>Price per Seat</th>
-              <th style={{ padding: 8, color: theme === 'light' ? '#172b4d' : '#fff' }}>Total Price</th>
-              <th style={{ padding: 8, color: theme === 'light' ? '#172b4d' : '#fff' }}>Payment Screenshot</th>
-              <th style={{ padding: 8, color: theme === 'light' ? '#172b4d' : '#fff' }}>UPI Txn ID</th>
-              <th style={{ padding: 8, color: theme === 'light' ? '#172b4d' : '#fff' }}>Status</th>
-              <th style={{ padding: 8, color: theme === 'light' ? '#172b4d' : '#fff' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.length === 0 ? (
-              <tr><td colSpan={8} style={{ color: theme === 'light' ? '#b23b3b' : '#ffeaea', textAlign: 'center', padding: 16 }}>No bookings found.</td></tr>
-            ) : filtered.map(b => (
-              <tr key={b._id} style={{ borderBottom: '1px solid #333' }}>
-                <td style={{ padding: 8 }}>{b.userId}</td>
-                <td style={{ padding: 8 }}>{b.exam}</td>
-                <td style={{ padding: 8 }}>{b.city}</td>
-                <td style={{ padding: 8 }}>{b.date}</td>
-                <td style={{ padding: 8 }}>{b.bus}</td>
-                <td style={{ padding: 8 }}>{Array.isArray(b.seatNumbers) ? b.seatNumbers.join(', ') : b.seatNumbers || '-'}</td>
-                <td style={{ padding: 8 }}>{b.price || 0}</td>
-                <td style={{ padding: 8 }}>{(b.price || 0) * (Array.isArray(b.seatNumbers) ? b.seatNumbers.length : 1)}</td>
-                <td style={{ padding: 8 }}>
-                  {b.upiScreenshot && b.upiScreenshot.startsWith('/uploads/') ? (
-                    <a href={b.upiScreenshot} target="_blank" rel="noopener noreferrer">
-                      <img src={b.upiScreenshot} alt="Payment Screenshot" style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 6, border: '1px solid #ccc' }} />
-                    </a>
-                  ) : b.upiScreenshot ? b.upiScreenshot : b.upiTxnId ? b.upiTxnId : '-'}
-                </td>
-                <td style={{ padding: 8 }}>{b.upiTxnId || '-'}</td>
-                <td style={{ padding: 8 }}>
-                  <select value={b.status} onChange={e => handleStatus(b._id, e.target.value)} style={{ padding: 4, borderRadius: 4 }}>
-                    <option value="pending">pending</option>
-                    <option value="confirmed">confirmed</option>
-                    <option value="rejected">rejected</option>
-                  </select>
-                </td>
-                <td style={{ padding: 8, display: 'flex', gap: 8 }}>
-                  <button onClick={() => handleDelete(b._id)} style={{ background: '#ff5e62', color: '#fff', border: 'none', borderRadius: 6, padding: '4px 10px', fontWeight: 600, cursor: 'pointer' }}>Delete</button>
-                </td>
+      {loading ? <div style={{ color: theme === 'light' ? '#003366' : '#ffeaea', fontSize: 18, fontWeight: 600 }}>Loading...</div> : (
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', color: theme === 'light' ? '#172b4d' : '#fff', borderCollapse: 'collapse', fontSize: 15, minWidth: 900 }}>
+            <thead style={{ position: 'sticky', top: 0, zIndex: 2 }}>
+              <tr style={{ background: '#e0e7ef' }}>
+                <th style={{ padding: 10, color: '#172b4d', fontWeight: 700 }}>User</th>
+                <th style={{ padding: 10, color: '#172b4d', fontWeight: 700 }}>Exam</th>
+                <th style={{ padding: 10, color: '#172b4d', fontWeight: 700 }}>City</th>
+                <th style={{ padding: 10, color: '#172b4d', fontWeight: 700 }}>Date</th>
+                <th style={{ padding: 10, color: '#172b4d', fontWeight: 700 }}>Bus</th>
+                <th style={{ padding: 10, color: '#172b4d', fontWeight: 700 }}>Seats</th>
+                <th style={{ padding: 10, color: '#172b4d', fontWeight: 700 }}>Price per Seat</th>
+                <th style={{ padding: 10, color: '#172b4d', fontWeight: 700 }}>Total Price</th>
+                <th style={{ padding: 10, color: '#172b4d', fontWeight: 700 }}>Payment Screenshot</th>
+                <th style={{ padding: 10, color: '#172b4d', fontWeight: 700 }}>UPI Txn ID</th>
+                <th style={{ padding: 10, color: '#172b4d', fontWeight: 700 }}>Status</th>
+                <th style={{ padding: 10, color: '#172b4d', fontWeight: 700 }}>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={12} style={{ color: '#ef4444', textAlign: 'center', padding: 32, fontSize: 18, fontWeight: 600, background: '#f8fafc' }}>
+                    <span style={{ fontSize: 28, marginRight: 8 }}>🛑</span> No bookings found.
+                  </td>
+                </tr>
+              ) : filtered.map((b, idx) => (
+                <tr key={b._id} style={{ borderBottom: '1.5px solid #e5e7eb', background: idx % 2 === 0 ? '#f8fafc' : '#fff', transition: 'background 0.2s' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = '#e0e7ef'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = idx % 2 === 0 ? '#f8fafc' : '#fff'; }}
+                >
+                  <td style={{ padding: 10 }}>{b.userId}</td>
+                  <td style={{ padding: 10 }}>{b.exam}</td>
+                  <td style={{ padding: 10 }}>{b.city}</td>
+                  <td style={{ padding: 10 }}>{b.date}</td>
+                  <td style={{ padding: 10 }}>{b.bus}</td>
+                  <td style={{ padding: 10 }}>{Array.isArray(b.seatNumbers) ? b.seatNumbers.join(', ') : b.seatNumbers || '-'}</td>
+                  <td style={{ padding: 10 }}>{b.price || 0}</td>
+                  <td style={{ padding: 10 }}>{(b.price || 0) * (Array.isArray(b.seatNumbers) ? b.seatNumbers.length : 1)}</td>
+                  <td style={{ padding: 10 }}>
+                    {b.upiScreenshot && b.upiScreenshot.startsWith('/uploads/') ? (
+                      <a href={b.upiScreenshot} target="_blank" rel="noopener noreferrer">
+                        <img src={b.upiScreenshot} alt="Payment Screenshot" style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 6, border: '1px solid #ccc', boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }} />
+                      </a>
+                    ) : b.upiScreenshot ? b.upiScreenshot : b.upiTxnId ? b.upiTxnId : '-'}
+                  </td>
+                  <td style={{ padding: 10 }}>{b.upiTxnId || '-'}</td>
+                  <td style={{ padding: 10 }}>
+                    <select value={b.status} onChange={e => handleStatus(b._id, e.target.value)} style={{ padding: 6, borderRadius: 6, border: '1.5px solid #d1d5db', background: '#f8fafc', fontWeight: 600, fontSize: 15, transition: 'border 0.2s' }}>
+                      <option value="pending">pending</option>
+                      <option value="confirmed">confirmed</option>
+                      <option value="rejected">rejected</option>
+                    </select>
+                  </td>
+                  <td style={{ padding: 10, display: 'flex', gap: 8 }}>
+                    <button onClick={() => handleDelete(b._id)} style={{ background: '#ff5e62', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 16px', fontWeight: 700, fontSize: 15, cursor: 'pointer', boxShadow: '0 1px 4px rgba(239,68,68,0.10)', transition: 'background 0.2s, box-shadow 0.2s' }}>Delete</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );
