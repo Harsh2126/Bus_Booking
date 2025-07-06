@@ -1,7 +1,27 @@
 "use client";
+import {
+    AlertCircle,
+    ArrowLeft,
+    Building,
+    Calendar,
+    CheckCircle,
+    Edit3,
+    Eye,
+    EyeOff,
+    GraduationCap,
+    Lock,
+    LogOut,
+    Mail,
+    Save,
+    Shield,
+    User,
+    X
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useContext, useEffect, useState } from 'react';
-import { ThemeContext } from '../ThemeProvider';
+import { useEffect, useState } from 'react';
+import { Button } from '../components/ui/Button';
+import { Card, CardContent } from '../components/ui/Card';
+import { Input } from '../components/ui/Input';
 
 const palettes = {
   blueSlate: {
@@ -41,9 +61,9 @@ export default function ProfilePage() {
   const [pwSaving, setPwSaving] = useState(false);
   const [pwError, setPwError] = useState('');
   const [pwSuccess, setPwSuccess] = useState('');
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
   const router = useRouter();
-  const { theme } = useContext(ThemeContext);
-  const palette = theme === 'light' ? palettes.classicCorporate : palettes.blueSlate;
 
   useEffect(() => {
     fetch('/api/auth/me')
@@ -72,7 +92,7 @@ export default function ProfilePage() {
     setSaving(true);
     setError('');
     try {
-      const res = await fetch(`/api/users/${user.userId}`, {
+      const res = await fetch(`/api/users/${user._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
@@ -98,7 +118,7 @@ export default function ProfilePage() {
     setPwError('');
     setPwSuccess('');
     try {
-      const res = await fetch(`/api/users/${user.userId}/password`, {
+      const res = await fetch(`/api/users/${user._id}/password`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(pwForm),
@@ -113,84 +133,305 @@ export default function ProfilePage() {
     }
   };
 
-  if (loading) return <div style={{ color: palette.primary, textAlign: 'center', marginTop: 64 }}>Loading...</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <User className="h-8 w-8 text-white" />
+          </div>
+          <h2 className="text-xl font-semibold text-gray-700 mb-2">Loading profile...</h2>
+          <p className="text-gray-500">Please wait while we fetch your data</p>
+        </div>
+      </div>
+    );
+  }
+  
   if (!user) return null;
 
   return (
-    <div style={{ minHeight: '100vh', background: theme === 'light' ? palette.bgLight : palette.bgDark, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Inter, sans-serif', color: theme === 'light' ? palette.textLight : palette.textDark }}>
-      <div style={{ background: theme === 'light' ? palette.card : palette.cardDark, borderRadius: 24, boxShadow: '0 8px 32px rgba(0,0,0,0.10)', padding: '48px 36px', minWidth: 340, maxWidth: 400, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <div style={{ background: `linear-gradient(90deg, ${palette.primary} 0%, ${palette.accent} 100%)`, borderRadius: '50%', width: 84, height: 84, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 18, boxShadow: '0 2px 12px rgba(79,140,255,0.13)' }}>
-          <span style={{ fontSize: 44, color: '#fff' }}>{user.email.charAt(0).toUpperCase()}</span>
-        </div>
-        <h2 style={{ fontWeight: 800, fontSize: '1.6rem', marginBottom: 8, color: palette.primary, letterSpacing: '1px' }}>Profile</h2>
-        <div style={{ color: theme === 'light' ? palette.secondary : palette.textDark, fontSize: '1.08rem', marginBottom: 18, textAlign: 'center', width: '100%' }}>
-          {editMode ? (
-            <>
-              <input name="name" value={form.name || ''} onChange={handleChange} placeholder="Name" style={inputStyle(theme, palette)} />
-              <input name="age" value={form.age || ''} onChange={handleChange} placeholder="Age" type="number" style={inputStyle(theme, palette)} />
-              <input name="course" value={form.course || ''} onChange={handleChange} placeholder="Course" style={inputStyle(theme, palette)} />
-              <input name="college" value={form.college || ''} onChange={handleChange} placeholder="College" style={inputStyle(theme, palette)} />
-              <input name="email" value={form.email || ''} onChange={handleChange} placeholder="Email" style={inputStyle(theme, palette)} />
-            </>
-          ) : (
-            <>
-              <div><b>Name:</b> {user.name || '-'}</div>
-              <div><b>Age:</b> {user.age || '-'}</div>
-              <div><b>Course:</b> {user.course || '-'}</div>
-              <div><b>College:</b> {user.college || '-'}</div>
-              <div><b>Email:</b> {user.email}</div>
-              <div><b>Role:</b> {user.role || 'user'}</div>
-            </>
-          )}
-        </div>
-        {error && <div style={{ color: '#ff5e62', marginBottom: 8 }}>{error}</div>}
-        {editMode ? (
-          <>
-            <button onClick={handleSave} disabled={saving} style={buttonStyle(theme, palette)}>Save</button>
-            <button onClick={() => { setEditMode(false); setForm({ ...user }); }} style={{ ...buttonStyle(theme, palette), background: '#aaa', marginTop: 8 }}>Cancel</button>
-          </>
-        ) : (
-          <button onClick={() => setEditMode(true)} style={buttonStyle(theme, palette)}>Edit Profile</button>
-        )}
-        <button onClick={handleLogout} style={{ ...buttonStyle(theme, palette), background: `linear-gradient(90deg, #ff5e62 0%, #ffb347 100%)`, marginTop: 12 }}>Logout</button>
-        <button onClick={() => router.push('/dashboard')} style={{ ...buttonStyle(theme, palette), background: `linear-gradient(90deg, ${palette.primary} 0%, ${palette.accent} 100%)`, marginTop: 8 }}>Back to Dashboard</button>
-        {/* Change Password Section */}
-        <div style={{ marginTop: 32, width: '100%' }}>
-          <h3 style={{ color: palette.primary, marginBottom: 10, fontSize: '1.1rem' }}>Change Password</h3>
-          <form onSubmit={handlePwSave} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <input name="oldPassword" value={pwForm.oldPassword} onChange={handlePwChange} placeholder="Old Password" type="password" style={inputStyle(theme, palette)} required />
-            <input name="newPassword" value={pwForm.newPassword} onChange={handlePwChange} placeholder="New Password" type="password" style={inputStyle(theme, palette)} required />
-            <button type="submit" disabled={pwSaving} style={buttonStyle(theme, palette)}>Change Password</button>
-          </form>
-          {pwError && <div style={{ color: '#ff5e62', marginTop: 6 }}>{pwError}</div>}
-          {pwSuccess && <div style={{ color: palette.primary, marginTop: 6 }}>{pwSuccess}</div>}
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4">
+      <div className="max-w-2xl mx-auto">
+        <Card className="shadow-xl">
+          <CardContent className="p-8">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <div className="w-20 h-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <span className="text-2xl font-bold text-white">
+                  {user.email.charAt(0).toUpperCase()}
+                </span>
+              </div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Profile</h1>
+              <p className="text-gray-600">Manage your account information</p>
+            </div>
+
+            {/* Profile Information */}
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold text-gray-900 flex items-center space-x-2">
+                  <User className="h-5 w-5" />
+                  <span>Personal Information</span>
+                </h2>
+                {!editMode && (
+                  <Button
+                    onClick={() => setEditMode(true)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                    size="sm"
+                  >
+                    <Edit3 className="h-4 w-4 mr-2" />
+                    Edit Profile
+                  </Button>
+                )}
+              </div>
+
+              {error && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-red-600 text-sm">{error}</p>
+                </div>
+              )}
+
+              {editMode ? (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                    <Input
+                      name="name"
+                      value={form.name || ''}
+                      onChange={handleChange}
+                      placeholder="Enter your full name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Age</label>
+                    <Input
+                      name="age"
+                      value={form.age || ''}
+                      onChange={handleChange}
+                      placeholder="Enter your age"
+                      type="number"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Course</label>
+                    <Input
+                      name="course"
+                      value={form.course || ''}
+                      onChange={handleChange}
+                      placeholder="Enter your course"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">College</label>
+                    <Input
+                      name="college"
+                      value={form.college || ''}
+                      onChange={handleChange}
+                      placeholder="Enter your college"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <Input
+                      name="email"
+                      value={form.email || ''}
+                      onChange={handleChange}
+                      placeholder="Enter your email"
+                      type="email"
+                    />
+                  </div>
+                  
+                  <div className="flex space-x-3">
+                    <Button
+                      onClick={handleSave}
+                      disabled={saving}
+                      className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      {saving ? (
+                        <div className="flex items-center space-x-2">
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          <span>Saving...</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center space-x-2">
+                          <Save className="h-4 w-4" />
+                          <span>Save Changes</span>
+                        </div>
+                      )}
+                    </Button>
+                    <Button
+                      onClick={() => { setEditMode(false); setForm({ ...user }); }}
+                      className="flex-1 bg-gray-600 hover:bg-gray-700 text-white"
+                    >
+                      <X className="h-4 w-4 mr-2" />
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                      <User className="h-5 w-5 text-gray-500" />
+                      <div>
+                        <p className="text-sm text-gray-500">Name</p>
+                        <p className="font-medium text-gray-900">{user.name || 'Not provided'}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                      <Calendar className="h-5 w-5 text-gray-500" />
+                      <div>
+                        <p className="text-sm text-gray-500">Age</p>
+                        <p className="font-medium text-gray-900">{user.age || 'Not provided'}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                      <GraduationCap className="h-5 w-5 text-gray-500" />
+                      <div>
+                        <p className="text-sm text-gray-500">Course</p>
+                        <p className="font-medium text-gray-900">{user.course || 'Not provided'}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                      <Building className="h-5 w-5 text-gray-500" />
+                      <div>
+                        <p className="text-sm text-gray-500">College</p>
+                        <p className="font-medium text-gray-900">{user.college || 'Not provided'}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                      <Mail className="h-5 w-5 text-gray-500" />
+                      <div>
+                        <p className="text-sm text-gray-500">Email</p>
+                        <p className="font-medium text-gray-900">{user.email}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                      <Shield className="h-5 w-5 text-gray-500" />
+                      <div>
+                        <p className="text-sm text-gray-500">Role</p>
+                        <p className="font-medium text-gray-900 capitalize">{user.role || 'user'}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Change Password Section */}
+            <div className="mt-8 pt-8 border-t border-gray-200">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+                <Lock className="h-5 w-5" />
+                <span>Change Password</span>
+              </h3>
+              
+              <form onSubmit={handlePwSave} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Input
+                      name="oldPassword"
+                      value={pwForm.oldPassword}
+                      onChange={handlePwChange}
+                      placeholder="Enter current password"
+                      type={showOldPassword ? 'text' : 'password'}
+                      className="pl-10 pr-10"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowOldPassword(!showOldPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      {showOldPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">New Password</label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Input
+                      name="newPassword"
+                      value={pwForm.newPassword}
+                      onChange={handlePwChange}
+                      placeholder="Enter new password"
+                      type={showNewPassword ? 'text' : 'password'}
+                      className="pl-10 pr-10"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      {showNewPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
+                  </div>
+                </div>
+
+                <Button
+                  type="submit"
+                  disabled={pwSaving}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  {pwSaving ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>Changing Password...</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2">
+                      <Lock className="h-4 w-4" />
+                      <span>Change Password</span>
+                    </div>
+                  )}
+                </Button>
+              </form>
+
+              {pwError && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded-lg mt-4">
+                  <p className="text-red-600 text-sm flex items-center space-x-2">
+                    <AlertCircle className="h-4 w-4" />
+                    <span>{pwError}</span>
+                  </p>
+                </div>
+              )}
+              
+              {pwSuccess && (
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg mt-4">
+                  <p className="text-green-600 text-sm flex items-center space-x-2">
+                    <CheckCircle className="h-4 w-4" />
+                    <span>{pwSuccess}</span>
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="mt-8 pt-8 border-t border-gray-200 space-y-3">
+              <Button
+                onClick={() => router.push('/dashboard')}
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Dashboard
+              </Button>
+              
+              <Button
+                onClick={handleLogout}
+                className="w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
-}
-
-const inputStyle = (theme: string, palette: any) => ({
-  width: '100%',
-  padding: '10px 12px',
-  borderRadius: 10,
-  border: '1px solid #ccc',
-  marginBottom: 10,
-  fontSize: '1rem',
-  color: theme === 'light' ? palette.textLight : palette.textDark,
-  background: theme === 'light' ? palette.card : palette.cardDark,
-});
-
-const buttonStyle = (theme: string, palette: any) => ({
-  width: '100%',
-  padding: '12px 0',
-  borderRadius: 12,
-  background: `linear-gradient(90deg, ${palette.primary} 0%, ${palette.accent} 100%)`,
-  color: '#fff',
-  fontWeight: 700,
-  fontSize: '1.08rem',
-  border: 'none',
-  boxShadow: '0 2px 12px rgba(79,140,255,0.13)',
-  cursor: 'pointer',
-  transition: 'background 0.2s',
-}); 
+} 

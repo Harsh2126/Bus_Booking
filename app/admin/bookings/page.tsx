@@ -21,13 +21,15 @@ export default function AdminBookingsPage() {
         padding: '20px',
         background: '#334155',
         borderRadius: '12px',
-        border: '1px solid #475569'
+        border: '1px solid #475569',
+        color: 'white',
+        fontWeight: 600,
+        fontSize: '20px',
+        gap: '16px'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <span style={{ fontSize: '24px' }}>📋</span>
-          <h2 style={{ fontSize: '20px', fontWeight: '600', margin: 0, color: 'white' }}>
-            Booking Management
-          </h2>
+          Booking Management
         </div>
         <div style={{ 
           fontWeight: '600', 
@@ -37,7 +39,6 @@ export default function AdminBookingsPage() {
           Total: {total !== null ? total : '...'}
         </div>
       </div>
-      
       <div style={{ 
         background: '#334155',
         borderRadius: '16px',

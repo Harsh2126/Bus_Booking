@@ -1,9 +1,24 @@
 'use client';
 import jsPDF from 'jspdf';
+import {
+    AlertCircle,
+    ArrowRight,
+    Bus,
+    Calendar,
+    CheckCircle,
+    Clock,
+    Download,
+    MapPin,
+    Ticket,
+    Trash2,
+    User,
+    X,
+    XCircle
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useContext, useEffect, useState } from 'react';
-import Spinner from '../components/Spinner';
-import { ThemeContext } from '../ThemeProvider';
+import { useEffect, useState } from 'react';
+import { Button } from '../components/ui/Button';
+import { Card, CardContent } from '../components/ui/Card';
 
 const palettes = {
   blueSlate: {
@@ -73,7 +88,7 @@ export default function BookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [buses, setBuses] = useState<Bus[]>([]);
   const [cities, setCities] = useState<City[]>([]);
-  const [user, setUser] = useState<{ email: string; userId?: string } | null>(null);
+  const [user, setUser] = useState<{ email: string; _id?: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -81,8 +96,6 @@ export default function BookingsPage() {
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   const [contactNumber, setContactNumber] = useState('');
   const router = useRouter();
-  const { theme } = useContext(ThemeContext);
-  const palette = theme === 'light' ? palettes.classicCorporate : palettes.blueSlate;
 
   // Fetch user and data from API on mount
   useEffect(() => {
@@ -93,7 +106,7 @@ export default function BookingsPage() {
           setUser(data.user);
           
           // Fetch bookings
-          fetch(`/api/bookings?userId=${data.user.userId}`)
+          fetch(`/api/bookings?userId=${data.user._id}`)
             .then(res => res.json())
             .then(data => {
               if (Array.isArray(data.bookings)) setBookings(data.bookings);
@@ -123,7 +136,7 @@ export default function BookingsPage() {
     if (!user) return;
     
     const interval = setInterval(() => {
-      fetch(`/api/bookings?userId=${user.userId}`)
+              fetch(`/api/bookings?userId=${user._id}`)
         .then(res => res.json())
         .then(data => {
           if (Array.isArray(data.bookings)) setBookings(data.bookings);
@@ -196,8 +209,8 @@ export default function BookingsPage() {
     y += 8;
     doc.setFontSize(11);
     doc.setTextColor(120, 120, 120);
-    doc.text('Thank you for booking with BusBooking!', 10, y);
-    doc.text('For support: support@busbooking.com', 10, y + 8);
+    doc.text('Thank you for booking with Smartify!', 10, y);
+    doc.text('For support: support@smartify.com', 10, y + 8);
 
     doc.save('ticket.pdf');
     setToast('Ticket downloaded!');
@@ -224,7 +237,7 @@ export default function BookingsPage() {
         price: selectedBus.price,
         contactNumber: contactNumber,
         exam: selectedBus.exam || '',
-        userId: user?.userId || user?.email
+        userId: user?._id || user?.email
       };
 
       const res = await fetch('/api/bookings', {
@@ -241,7 +254,7 @@ export default function BookingsPage() {
       }
 
       // Re-fetch all bookings after booking
-      fetch(`/api/bookings?userId=${user?.userId || user?.email}`)
+      fetch(`/api/bookings?userId=${user?._id || user?.email}`)
         .then(res => res.json())
         .then(data => {
           if (Array.isArray(data)) setBookings(data);
@@ -268,52 +281,160 @@ export default function BookingsPage() {
     );
   };
 
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'confirmed':
+        return <CheckCircle className="h-5 w-5 text-green-500" />;
+      case 'pending':
+        return <AlertCircle className="h-5 w-5 text-yellow-500" />;
+      case 'rejected':
+        return <XCircle className="h-5 w-5 text-red-500" />;
+      default:
+        return <Clock className="h-5 w-5 text-gray-500" />;
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'confirmed':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'rejected':
+        return 'bg-red-100 text-red-800 border-red-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
   const renderBookingsTab = () => (
-    <div>
-      <h2 style={{ fontWeight: 800, fontSize: '2rem', marginBottom: 24, textAlign: 'center', color: palette.primary }}>Your Bookings</h2>
-      {error && <div style={{ color: '#ff5e62', marginBottom: 16, textAlign: 'center' }}>{error}</div>}
-      {loading && <div style={{ marginBottom: 16, textAlign: 'center' }}><Spinner size={28} label="Loading..." /></div>}
-      {bookings.length === 0 ? (
-        <div style={{ color: theme === 'light' ? '#b23b3b' : '#ffeaea', textAlign: 'center', marginTop: 32 }}>
-          No bookings yet. 
+    <div className="space-y-6">
+      <div className="text-center">
+        <h2 className="text-3xl font-bold text-gray-900 mb-2 flex items-center justify-center space-x-3">
+          <Ticket className="h-8 w-8 text-blue-600" />
+          <span>Your Bookings</span>
+        </h2>
+        <p className="text-gray-600">Manage and track all your bus bookings</p>
+      </div>
+
+      {error && (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-red-600 text-sm">{error}</p>
         </div>
+      )}
+
+      {loading && (
+        <div className="flex items-center justify-center py-8">
+          <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          <span className="ml-2 text-gray-600">Loading...</span>
+        </div>
+      )}
+
+      {bookings.length === 0 ? (
+        <Card className="text-center py-12">
+          <Bus className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">No bookings yet</h3>
+          <p className="text-gray-600 mb-6">Start your journey by booking your first bus trip</p>
+          <Button 
+            onClick={() => router.push('/dashboard')}
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+          >
+            Explore Available Buses
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </Card>
       ) : (
-        <ul style={{ listStyle: 'none', padding: 0 }}>
-          {bookings.map((b, i) => (
-            <li key={b._id || i} style={{ background: theme === 'light' ? palette.bgLight : 'rgba(255,255,255,0.10)', borderRadius: 14, padding: 18, marginBottom: 16, color: theme === 'light' ? palette.textLight : palette.textDark }}>
-              <div><b>Exam:</b> {b.exam}</div>
-              <div><b>City:</b> {b.city}</div>
-              <div><b>Date:</b> {b.date}</div>
-              <div><b>Bus:</b> {b.bus} {b.busNumber ? `(${b.busNumber})` : ''}</div>
-              <div><b>Route:</b> {b.routeFrom} → {b.routeTo}</div>
-              <div><b>Timing:</b> {b.timing || '-'}</div>
-              <div><b>Contact:</b> {b.contactNumber || '-'}</div>
-              <div><b>Seat No:</b> {Array.isArray(b.seatNumbers) ? b.seatNumbers.join(', ') : ''}</div>
-              <div><b>Price per Seat:</b> Rs. {b.price || 0}</div>
-              <div><b>Total Price:</b> Rs. {(b.price || 0) * (Array.isArray(b.seatNumbers) ? b.seatNumbers.length : 1)}</div>
-              <div style={{ marginTop: 12, display: 'flex', gap: 12 }}>
-                <button
-                  onClick={() => handleDownload(b)}
-                  disabled={b.status !== 'confirmed'}
-                  style={{
-                    background: b.status === 'confirmed' ? `linear-gradient(90deg, ${palette.accent} 0%, ${palette.primary} 100%)` : '#ccc',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: 8,
-                    padding: '6px 16px',
-                    fontWeight: 600,
-                    cursor: b.status === 'confirmed' ? 'pointer' : 'not-allowed',
-                    opacity: b.status === 'confirmed' ? 1 : 0.6,
-                  }}
-                >
-                  Download
-                </button>
-                {b.status === 'pending' && <span style={{ padding: '6px 16px', borderRadius: 8, background: '#fbbf24', color: '#222', fontWeight: 600 }}>Awaiting Approval</span>}
-                {b.status === 'rejected' && <span style={{ padding: '6px 16px', borderRadius: 8, background: '#ef4444', color: '#fff', fontWeight: 600 }}>Rejected</span>}
-              </div>
-            </li>
+        <div className="space-y-6">
+          {bookings.map((booking, index) => (
+            <Card key={booking._id || index} className="hover:shadow-lg transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-3 mb-3">
+                      <Bus className="h-5 w-5 text-blue-600" />
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        {booking.bus} {booking.busNumber && `(${booking.busNumber})`}
+                      </h3>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <MapPin className="h-4 w-4 text-gray-500" />
+                          <span className="text-gray-600">
+                            <span className="font-medium">Route:</span> {booking.routeFrom} → {booking.routeTo}
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Calendar className="h-4 w-4 text-gray-500" />
+                          <span className="text-gray-600">
+                            <span className="font-medium">Date:</span> {booking.date}
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Clock className="h-4 w-4 text-gray-500" />
+                          <span className="text-gray-600">
+                            <span className="font-medium">Time:</span> {booking.timing || '-'}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <User className="h-4 w-4 text-gray-500" />
+                          <span className="text-gray-600">
+                            <span className="font-medium">Contact:</span> {booking.contactNumber || '-'}
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Ticket className="h-4 w-4 text-gray-500" />
+                          <span className="text-gray-600">
+                            <span className="font-medium">Seats:</span> {Array.isArray(booking.seatNumbers) ? booking.seatNumbers.join(', ') : ''}
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-gray-600">
+                            <span className="font-medium">Total Price:</span> ₹{(booking.price || 0) * (Array.isArray(booking.seatNumbers) ? booking.seatNumbers.length : 1)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="text-right space-y-3">
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(booking.status || '')}`}>
+                      {getStatusIcon(booking.status || '')}
+                      <span className="ml-1 capitalize">{booking.status}</span>
+                    </span>
+                    
+                    <div className="flex space-x-2">
+                      <Button
+                        onClick={() => handleDownload(booking)}
+                        disabled={booking.status !== 'confirmed'}
+                        className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 text-sm"
+                        size="sm"
+                      >
+                        <Download className="h-4 w-4 mr-1" />
+                        Download
+                      </Button>
+                      
+                      {booking.status === 'pending' && (
+                        <Button
+                          onClick={() => handleCancel(booking._id || '')}
+                          className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 text-sm"
+                          size="sm"
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Cancel
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );
@@ -321,11 +442,27 @@ export default function BookingsPage() {
   if (!user) return null;
 
   return (
-    <div style={{ minHeight: '100vh', background: theme === 'light' ? palette.bgLight : palette.bgDark, color: theme === 'light' ? palette.textLight : palette.textDark, fontFamily: 'Inter, sans-serif', padding: '48px 0', position: 'relative' }}>
-      {toast && <div style={{ position: 'fixed', top: 32, right: 32, background: palette.accent, color: '#222', padding: '12px 28px', borderRadius: 12, fontWeight: 700, zIndex: 1000 }}>{toast}</div>}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4">
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed top-8 right-8 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center space-x-2">
+          <CheckCircle className="h-5 w-5" />
+          <span className="font-medium">{toast}</span>
+          <button 
+            onClick={() => setToast(null)}
+            className="ml-2 hover:bg-green-600 rounded-full p-1"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
       
-      <div style={{ maxWidth: 800, margin: '0 auto', background: theme === 'light' ? palette.card : palette.cardDark, borderRadius: 18, padding: '36px 32px', boxShadow: '0 2px 12px rgba(0,0,0,0.10)' }}>
-        {renderBookingsTab()}
+      <div className="max-w-4xl mx-auto">
+        <Card className="shadow-xl">
+          <CardContent className="p-8">
+            {renderBookingsTab()}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

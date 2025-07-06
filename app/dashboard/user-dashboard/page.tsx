@@ -1,6 +1,25 @@
 "use client";
+import {
+    AlertCircle,
+    ArrowRight,
+    Bus,
+    Calendar,
+    CheckCircle,
+    Clock,
+    FileText,
+    Home,
+    MapPin,
+    Settings,
+    Star,
+    Ticket,
+    TrendingUp,
+    User,
+    XCircle
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { Button } from '../../components/ui/Button';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 
 interface User {
   _id: string;
@@ -35,6 +54,23 @@ interface Recommendation {
   desc: string;
 }
 
+// Helper functions for date-only comparison
+function isSameOrAfterToday(dateStr: string) {
+  const today = new Date();
+  const bookingDate = new Date(dateStr);
+  today.setHours(0,0,0,0);
+  bookingDate.setHours(0,0,0,0);
+  return bookingDate >= today;
+}
+
+function isBeforeToday(dateStr: string) {
+  const today = new Date();
+  const bookingDate = new Date(dateStr);
+  today.setHours(0,0,0,0);
+  bookingDate.setHours(0,0,0,0);
+  return bookingDate < today;
+}
+
 export default function UserDashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -53,9 +89,9 @@ export default function UserDashboard() {
             return;
           }
           setUser(data.user);
-          
+          // Always fetch bookings for the current user only
           Promise.all([
-            fetch('/api/bookings').then(res => res.json()),
+            fetch(`/api/bookings?userId=${data.user._id || data.user.email}`).then(res => res.json()),
             fetch('/api/recommendations').then(res => res.json())
           ]).then(([bookingsData, recommendationsData]) => {
             setBookings(bookingsData.bookings || []);
@@ -86,7 +122,7 @@ export default function UserDashboard() {
   }, [user]);
 
   const upcomingBookings = bookings.filter(booking => 
-    new Date(booking.date) > new Date()
+    isSameOrAfterToday(booking.date)
   );
 
   const pendingBookings = bookings.filter(booking => 
@@ -94,378 +130,396 @@ export default function UserDashboard() {
   );
 
   const completedBookings = bookings.filter(booking => 
-    new Date(booking.date) <= new Date() && booking.status === 'confirmed'
+    isBeforeToday(booking.date) && booking.status === 'confirmed'
   );
 
   if (loading) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh',
-        background: '#f8fafc'
-      }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '48px', marginBottom: '16px' }}>🚌</div>
-          <div style={{ fontSize: '18px', color: '#64748b' }}>Loading your dashboard...</div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <Bus className="h-8 w-8 text-white" />
+          </div>
+          <h2 className="text-xl font-semibold text-gray-700 mb-2">Loading your dashboard...</h2>
+          <p className="text-gray-500">Please wait while we fetch your data</p>
         </div>
       </div>
     );
   }
 
   const sidebarItems = [
-    { id: 'overview', label: 'Overview', icon: '🏠' },
-    { id: 'bookings', label: 'My Bookings', icon: '📋' },
-    { id: 'exam', label: 'Book Exam', icon: '📝' },
-    { id: 'profile', label: 'Profile', icon: '👤' },
+    { id: 'overview', label: 'Overview', icon: Home },
+    { id: 'bookings', label: 'My Bookings', icon: Ticket },
+    { id: 'exam', label: 'Book Exam', icon: FileText },
+    { id: 'profile', label: 'Profile', icon: User },
   ];
 
-  const renderOverview = () => (
-    <div>
-      {/* Welcome Section */}
-      <div style={{
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        borderRadius: '20px',
-        padding: '32px',
-        color: 'white',
-        marginBottom: '32px',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-        <div style={{ position: 'absolute', right: '-20px', top: '-20px', fontSize: '120px', opacity: '0.1' }}>🚌</div>
-        <h1 style={{ margin: '0 0 8px 0', fontSize: '32px', fontWeight: '700' }}>
-          Welcome back, {user?.name || user?.email?.split('@')[0]}!
-        </h1>
-        <p style={{ margin: 0, fontSize: '16px', opacity: '0.9' }}>
-          Ready for your next journey? Let's get you on the road.
-        </p>
-      </div>
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'confirmed':
+        return <CheckCircle className="h-5 w-5 text-green-500" />;
+      case 'pending':
+        return <AlertCircle className="h-5 w-5 text-yellow-500" />;
+      case 'rejected':
+        return <XCircle className="h-5 w-5 text-red-500" />;
+      default:
+        return <Clock className="h-5 w-5 text-gray-500" />;
+    }
+  };
 
-      {/* Booking Count Card */}
-      <div style={{
-        background: 'white',
-        borderRadius: '16px',
-        padding: '24px',
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)',
-        border: '1px solid #e2e8f0',
-        marginBottom: '32px',
-        maxWidth: 320,
-        marginLeft: 'auto',
-        marginRight: 'auto',
-        textAlign: 'center'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
-          <div style={{ fontSize: '24px', marginRight: '12px' }}>🎫</div>
-          <div style={{ fontSize: '14px', color: '#64748b', fontWeight: '500' }}>TOTAL BOOKINGS</div>
-        </div>
-        <div style={{ fontSize: '32px', fontWeight: '700', color: '#1e293b' }}>
-          {bookings.length}
-        </div>
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'confirmed':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'rejected':
+        return 'bg-red-100 text-red-800 border-red-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const renderOverview = () => (
+    <div className="space-y-8">
+      {/* Welcome Section */}
+      <Card className="bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0">
+        <CardContent className="p-8 relative overflow-hidden">
+          <div className="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
+          <div className="absolute right-8 top-8 w-16 h-16 bg-white/10 rounded-full"></div>
+          <div className="relative z-10">
+            <h1 className="text-3xl font-bold mb-2">
+              Welcome back, {user?.name || user?.email?.split('@')[0]}! 👋
+            </h1>
+            <p className="text-blue-100 text-lg">
+              Ready for your next journey? Let&apos;s get you on the road.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="hover:shadow-lg transition-shadow">
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Ticket className="h-6 w-6 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Bookings</p>
+                <p className="text-2xl font-bold text-gray-900">{bookings.length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:shadow-lg transition-shadow">
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <Calendar className="h-6 w-6 text-green-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600">Upcoming</p>
+                <p className="text-2xl font-bold text-gray-900">{upcomingBookings.length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:shadow-lg transition-shadow">
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-yellow-100 rounded-lg">
+                <Clock className="h-6 w-6 text-yellow-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600">Pending</p>
+                <p className="text-2xl font-bold text-gray-900">{pendingBookings.length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:shadow-lg transition-shadow">
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <CheckCircle className="h-6 w-6 text-purple-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600">Completed</p>
+                <p className="text-2xl font-bold text-gray-900">{completedBookings.length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Quick Actions */}
-      <div style={{
-        background: 'white',
-        borderRadius: '20px',
-        padding: '32px',
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)',
-        border: '1px solid #e2e8f0',
-        marginBottom: '32px'
-      }}>
-        <h2 style={{ margin: '0 0 24px 0', fontSize: '24px', fontWeight: '600', color: '#1e293b' }}>
-          Quick Actions
-        </h2>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '20px'
-        }}>
-          <button 
-            onClick={() => router.push('/book-exam')}
-            style={{
-              background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '12px',
-              padding: '20px',
-              fontSize: '16px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'transform 0.2s',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '8px'
-            }}
-            onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-            onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-          >
-            <div style={{ fontSize: '32px' }}>📝</div>
-            <div>Book Exam</div>
-          </button>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <TrendingUp className="h-5 w-5" />
+            <span>Quick Actions</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Button 
+              onClick={() => router.push('/book-exam')}
+              className="h-20 bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white"
+            >
+              <div className="flex flex-col items-center space-y-2">
+                <FileText className="h-6 w-6" />
+                <span>Book Exam</span>
+              </div>
+            </Button>
 
-          <button 
-            onClick={() => router.push('/profile')}
-            style={{
-              background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '12px',
-              padding: '20px',
-              fontSize: '16px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'transform 0.2s',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '8px'
-            }}
-            onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-            onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-          >
-            <div style={{ fontSize: '32px' }}>👤</div>
-            <div>My Profile</div>
-          </button>
-        </div>
-      </div>
+            <Button 
+              onClick={() => router.push('/profile')}
+              className="h-20 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white"
+            >
+              <div className="flex flex-col items-center space-y-2">
+                <User className="h-6 w-6" />
+                <span>My Profile</span>
+              </div>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Recent Activity & Popular Routes */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
-        gap: '32px'
-      }}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Popular Routes */}
-        <div style={{
-          background: 'white',
-          borderRadius: '20px',
-          padding: '32px',
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)',
-          border: '1px solid #e2e8f0'
-        }}>
-          <h3 style={{ margin: '0 0 20px 0', fontSize: '20px', fontWeight: '600', color: '#1e293b' }}>
-            Popular Routes
-          </h3>
-          {recommendations.slice(0, 3).length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {recommendations.slice(0, 3).map((rec) => (
-                <div key={rec._id} style={{
-                  padding: '16px',
-                  background: '#f8fafc',
-                  borderRadius: '12px',
-                  border: '1px solid #e2e8f0',
-                  cursor: 'pointer',
-                  transition: 'transform 0.2s'
-                }}
-                onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-                onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-                onClick={() => router.push('/bookings')}
-                >
-                  <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '12px',
-                    marginBottom: '8px'
-                  }}>
-                    <div style={{ fontSize: '24px' }}>{rec.icon}</div>
-                    <div style={{ fontWeight: '600', color: '#1e293b' }}>
-                      {rec.route}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Star className="h-5 w-5" />
+              <span>Popular Routes</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {recommendations.slice(0, 3).length > 0 ? (
+              <div className="space-y-4">
+                {recommendations.slice(0, 3).map((rec) => (
+                  <div 
+                    key={rec._id} 
+                    className="p-4 bg-gray-50 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-100 transition-colors"
+                    onClick={() => router.push('/bookings')}
+                  >
+                    <div className="flex items-center space-x-3 mb-2">
+                      <span className="text-2xl">{rec.icon}</span>
+                      <h4 className="font-semibold text-gray-900">{rec.route}</h4>
+                    </div>
+                    <p className="text-sm text-gray-600">{rec.desc}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Star className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500">No recommendations available</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Recent Bookings */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Ticket className="h-5 w-5" />
+              <span>Recent Bookings</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {bookings.slice(0, 3).length > 0 ? (
+              <div className="space-y-4">
+                {bookings.slice(0, 3).map((booking) => (
+                  <div key={booking._id} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <h4 className="font-semibold text-gray-900">
+                          {booking.routeFrom} → {booking.routeTo}
+                        </h4>
+                        <p className="text-sm text-gray-600">
+                          {new Date(booking.date).toLocaleDateString()} • Seats: {booking.seatNumbers.join(', ')}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-lg font-bold text-green-600">₹{booking.price}</p>
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(booking.status)}`}>
+                          {getStatusIcon(booking.status)}
+                          <span className="ml-1">{booking.status}</span>
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  <div style={{ fontSize: '14px', color: '#64748b' }}>
-                    {rec.desc}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-              <div style={{ fontSize: '48px', marginBottom: '16px', opacity: '0.5' }}>⭐</div>
-              <p style={{ color: '#64748b', margin: 0 }}>No recommendations available</p>
-            </div>
-          )}
-        </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Bus className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500">No recent bookings</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
 
   const renderBookings = () => (
-    <div>
-      <div style={{
-        background: 'white',
-        borderRadius: '20px',
-        padding: '32px',
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)',
-        border: '1px solid #e2e8f0'
-      }}>
-        <h2 style={{ margin: '0 0 24px 0', fontSize: '24px', fontWeight: '600', color: '#1e293b' }}>
-          My Bookings
-        </h2>
-        {bookings.length > 0 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {bookings.map((booking) => (
-              <div key={booking._id} style={{
-                padding: '24px',
-                background: '#f8fafc',
-                borderRadius: '16px',
-                border: '1px solid #e2e8f0',
-                position: 'relative'
-              }}>
-                <div style={{ 
-                  display: 'flex', 
-                  justifyContent: 'space-between', 
-                  alignItems: 'flex-start',
-                  marginBottom: '12px'
-                }}>
-                  <div>
-                    <div style={{ fontWeight: '700', fontSize: '18px', color: '#1e293b', marginBottom: '4px' }}>
-                      {booking.routeFrom} → {booking.routeTo}
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Ticket className="h-5 w-5" />
+            <span>My Bookings</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {bookings.length > 0 ? (
+            <div className="space-y-4">
+              {bookings.map((booking) => (
+                <div key={booking._id} className="p-6 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-3 mb-2">
+                        <MapPin className="h-5 w-5 text-gray-500" />
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {booking.routeFrom} → {booking.routeTo}
+                        </h3>
+                      </div>
+                      <div className="flex items-center space-x-4 text-sm text-gray-600">
+                        <span className="flex items-center space-x-1">
+                          <Calendar className="h-4 w-4" />
+                          <span>{new Date(booking.date).toLocaleDateString()}</span>
+                        </span>
+                        <span>Seats: {booking.seatNumbers.join(', ')}</span>
+                        {booking.timing && (
+                          <span className="flex items-center space-x-1">
+                            <Clock className="h-4 w-4" />
+                            <span>{booking.timing}</span>
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <div style={{ fontSize: '14px', color: '#64748b' }}>
-                      {new Date(booking.date).toLocaleDateString()} • Seats: {booking.seatNumbers.join(', ')}
+                    <div className="text-right">
+                      <p className="text-2xl font-bold text-green-600 mb-2">₹{booking.price}</p>
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(booking.status)}`}>
+                        {getStatusIcon(booking.status)}
+                        <span className="ml-1 capitalize">{booking.status}</span>
+                      </span>
                     </div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ 
-                      fontSize: '20px', 
-                      fontWeight: '700', 
-                      color: '#059669',
-                      marginBottom: '8px'
-                    }}>
-                      ₹{booking.price}
-                    </div>
-                    <span style={{
-                      padding: '6px 16px',
-                      borderRadius: '20px',
-                      fontSize: '12px',
-                      fontWeight: '600',
-                      background: booking.status === 'confirmed' ? '#dcfce7' : 
-                                booking.status === 'pending' ? '#fef3c7' : '#fecaca',
-                      color: booking.status === 'confirmed' ? '#15803d' : 
-                             booking.status === 'pending' ? '#d97706' : '#dc2626'
-                    }}>
-                      {booking.status.toUpperCase()}
-                    </span>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-            <div style={{ fontSize: '64px', marginBottom: '24px', opacity: '0.5' }}>🚌</div>
-            <h3 style={{ margin: '0 0 16px 0', fontSize: '20px', fontWeight: '600', color: '#1e293b' }}>
-              No bookings yet
-            </h3>
-            <p style={{ color: '#64748b', margin: '0 0 24px 0' }}>
-              Start your journey by booking your first bus trip
-            </p>
-            <button 
-              onClick={() => router.push('/bookings')}
-              style={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '12px',
-                padding: '16px 32px',
-                fontSize: '16px',
-                fontWeight: '600',
-                cursor: 'pointer'
-              }}
-            >
-              Book Your First Trip
-            </button>
-          </div>
-        )}
-      </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <Bus className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">No bookings yet</h3>
+              <p className="text-gray-600 mb-6">Start your journey by booking your first bus trip</p>
+              <Button 
+                onClick={() => router.push('/bookings')}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              >
+                Book Your First Trip
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 
   return (
-    <div style={{
-      display: 'flex',
-      minHeight: '100vh',
-      background: '#f8fafc'
-    }}>
+    <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
-      <div style={{
-        width: '280px',
-        background: 'white',
-        borderRight: '1px solid #e2e8f0',
-        padding: '32px 0',
-        position: 'sticky',
-        top: 0,
-        height: '100vh',
-        overflowY: 'auto'
-      }}>
-        <div style={{ padding: '0 24px', marginBottom: '32px' }}>
-          <div style={{ 
-            fontSize: '24px', 
-            fontWeight: '700', 
-            color: '#1e293b',
-            marginBottom: '8px'
-          }}>
-            BusBooking
-          </div>
-          <div style={{ fontSize: '14px', color: '#64748b' }}>
-            Dashboard
+      <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <Bus className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-gray-900">Smartify</h1>
+              <p className="text-sm text-gray-500">Dashboard</p>
+            </div>
           </div>
         </div>
 
-        <nav>
-          {sidebarItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => {
-                if (item.id === 'book') router.push('/bookings?tab=book');
-                else if (item.id === 'exam') router.push('/book-exam');
-                else if (item.id === 'profile') router.push('/profile');
-                else if (item.id === 'bookings') router.push('/bookings');
-                else setActiveTab(item.id);
-              }}
-              style={{
-                width: '100%',
-                padding: '16px 24px',
-                background: activeTab === item.id ? '#f1f5f9' : 'transparent',
-                border: 'none',
-                textAlign: 'left',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                fontSize: '16px',
-                color: activeTab === item.id ? '#1e293b' : '#64748b',
-                fontWeight: activeTab === item.id ? '600' : '500',
-                transition: 'all 0.2s'
-              }}
-              onMouseOver={(e) => {
-                if (activeTab !== item.id) {
-                  e.currentTarget.style.background = '#f8fafc';
-                }
-              }}
-              onMouseOut={(e) => {
-                if (activeTab !== item.id) {
-                  e.currentTarget.style.background = 'transparent';
-                }
-              }}
-            >
-              <div style={{ fontSize: '20px' }}>{item.icon}</div>
-              <div>{item.label}</div>
-            </button>
-          ))}
+        <nav className="flex-1 p-4">
+          <div className="space-y-2">
+            {sidebarItems.map((item) => {
+              const IconComponent = item.icon;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    if (item.id === 'book') router.push('/bookings?tab=book');
+                    else if (item.id === 'exam') router.push('/book-exam');
+                    else if (item.id === 'profile') router.push('/profile');
+                    else if (item.id === 'bookings') router.push('/bookings');
+                    else setActiveTab(item.id);
+                  }}
+                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
+                    activeTab === item.id
+                      ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
+                >
+                  <IconComponent className="h-5 w-5" />
+                  <span className="font-medium">{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
         </nav>
+
+        <div className="p-4 border-t border-gray-200">
+          <button
+            onClick={() => router.push('/profile')}
+            className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+          >
+            <Settings className="h-5 w-5" />
+            <span className="font-medium">Settings</span>
+          </button>
+        </div>
       </div>
 
       {/* Main Content */}
-      <div style={{
-        flex: 1,
-        padding: '32px',
-        overflowY: 'auto'
-      }}>
-        {activeTab === 'overview' && renderOverview()}
-        {activeTab === 'bookings' && renderBookings()}
+      <div className="flex-1 overflow-auto">
+        <div className="p-8">
+          {activeTab === 'overview' && renderOverview()}
+          {activeTab === 'bookings' && renderBookings()}
+          {activeTab === 'exam' && (
+            <div className="text-center py-12">
+              <FileText className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Book Exam</h3>
+              <p className="text-gray-600 mb-6">Navigate to the exam booking page to schedule your exam</p>
+              <Button onClick={() => router.push('/book-exam')}>
+                Go to Exam Booking
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          )}
+          {activeTab === 'profile' && (
+            <div className="text-center py-12">
+              <User className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Profile</h3>
+              <p className="text-gray-600 mb-6">Manage your profile and account settings</p>
+              <Button onClick={() => router.push('/profile')}>
+                Go to Profile
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -1,36 +1,24 @@
 'use client';
 import jsPDF from 'jspdf';
+import {
+    AlertCircle,
+    ArrowLeft,
+    ArrowRight,
+    Bus,
+    Calendar,
+    CheckCircle,
+    Clock,
+    FileText,
+    MapPin,
+    User,
+    X
+} from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import React, { useContext, useEffect, useState } from 'react';
-import SeatSelector from '../components/SeatSelector';
-import Spinner from '../components/Spinner';
-import { ThemeContext } from '../ThemeProvider';
-
-const palettes = {
-  blueSlate: {
-    primary: '#2563eb',
-    secondary: '#64748b',
-    accent: '#fbbf24',
-    bgLight: '#f8fafc',
-    bgDark: '#0f172a',
-    textLight: '#1e293b',
-    textDark: '#f1f5f9',
-    card: '#fff',
-    cardDark: '#1e293b',
-  },
-  classicCorporate: {
-    primary: '#0052cc',
-    secondary: '#172b4d',
-    accent: '#36b37e',
-    bgLight: '#f4f5f7',
-    bgDark: '#222b45',
-    textLight: '#172b4d',
-    textDark: '#f4f5f7',
-    card: '#fff',
-    cardDark: '#222b45',
-  },
-};
+import React, { useEffect, useState } from 'react';
+import { Button } from '../components/ui/Button';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
+import { Input } from '../components/ui/Input';
 
 const BUS_TYPES = ["AC", "Non-AC", "Sleeper", "Seater"];
 
@@ -47,6 +35,12 @@ interface Bus {
   timing?: string;
   price?: number;
   exams?: string[];
+}
+
+interface User {
+  _id?: string;
+  email: string;
+  userId?: string;
 }
 
 interface Booking {
@@ -67,6 +61,57 @@ interface Booking {
   type?: string;
 }
 
+// SeatSelector component
+function SeatSelector({
+  capacity,
+  bookedSeats,
+  selectedSeats,
+  onSelect,
+  onConfirm,
+  onCancel
+}: {
+  capacity: number;
+  bookedSeats: string[];
+  selectedSeats: string[];
+  onSelect: (seat: string) => void;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  const seats = Array.from({ length: capacity }, (_, i) => (i + 1).toString());
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+      <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md">
+        <h2 className="text-xl font-bold mb-4">Select Your Seat(s)</h2>
+        <div className="grid grid-cols-5 gap-2 mb-6">
+          {seats.map(seat => {
+            const isBooked = bookedSeats.includes(seat);
+            const isSelected = selectedSeats.includes(seat);
+            return (
+              <button
+                key={seat}
+                disabled={isBooked}
+                onClick={() => onSelect(seat)}
+                className={`w-10 h-10 rounded-md border text-sm font-semibold
+                  ${isBooked ? 'bg-gray-300 text-gray-500 cursor-not-allowed' :
+                    isSelected ? 'bg-blue-600 text-white border-blue-700' :
+                    'bg-white text-gray-800 border-gray-300 hover:bg-blue-100'}
+                `}
+                type="button"
+              >
+                {seat}
+              </button>
+            );
+          })}
+        </div>
+        <div className="flex justify-end gap-2">
+          <Button onClick={onCancel} className="bg-gray-200 text-gray-700 hover:bg-gray-300">Cancel</Button>
+          <Button onClick={onConfirm} className="bg-blue-600 text-white" disabled={selectedSeats.length === 0}>Confirm</Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function BookExamPage() {
   const [exams, setExams] = useState<{ name: string; cities: string[] }[]>([]);
   const [selectedExam, setSelectedExam] = useState('');
@@ -81,10 +126,8 @@ export default function BookExamPage() {
   const [bookingStatus, setBookingStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [user, setUser] = useState<{ email: string; userId?: string } | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [toast, setToast] = useState<string | null>(null);
-  const { theme } = useContext(ThemeContext);
-  const palette = theme === 'light' ? palettes.classicCorporate : palettes.blueSlate;
   const [buses, setBuses] = useState<Bus[]>([]);
   const router = useRouter();
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
@@ -94,6 +137,23 @@ export default function BookExamPage() {
   const [upiTxnId, setUpiTxnId] = useState('');
   const [pendingMsg, setPendingMsg] = useState('');
   const [allBookings, setAllBookings] = useState<Booking[]>([]);
+  const [showSeatSelector, setShowSeatSelector] = useState(false);
+  const [seatSelectionBus, setSeatSelectionBus] = useState<Bus | null>(null);
+  const [seatSelectionDate, setSeatSelectionDate] = useState('');
+  const [seatSelectionCapacity, setSeatSelectionCapacity] = useState(40);
+  const [seatSelectionBookedSeats, setSeatSelectionBookedSeats] = useState<string[]>([]);
+  const [seatSelectionSelectedSeats, setSeatSelectionSelectedSeats] = useState<string[]>([]);
+  const [showBookingSuccess, setShowBookingSuccess] = useState(false);
+  const [bookingError, setBookingError] = useState<string | null>(null);
+  const [upiError, setUpiError] = useState<string | null>(null);
+
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return '';
+    if (dateStr.includes('-')) return dateStr; // Already in YYYY-MM-DD
+    const [day, month, year] = dateStr.split('/').map(s => s.trim());
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+  };
+  const formattedSelectedDate = formatDate(selectedDate);
 
   // Razorpay script loader
   useEffect(() => {
@@ -149,16 +209,7 @@ export default function BookExamPage() {
         .then(data => setAllBookings(Array.isArray(data.bookings) ? data.bookings : []))
         .catch(() => setAllBookings([]));
     }
-  }, [showResults, selectedDate, selectedRouteFrom, selectedRouteTo, selectedType]);
-
-  // Helper to format date to YYYY-MM-DD
-  const formatDate = (dateStr: string) => {
-    if (!dateStr) return '';
-    if (dateStr.includes('-')) return dateStr; // Already in YYYY-MM-DD
-    const [day, month, year] = dateStr.split('/').map(s => s.trim());
-    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-  };
-  const formattedSelectedDate = formatDate(selectedDate);
+  }, [showResults, selectedDate, selectedRouteFrom, selectedRouteTo, selectedType, formattedSelectedDate]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -181,421 +232,563 @@ export default function BookExamPage() {
     }
     // Find the selected bus object
     const busObj = buses.find(b => b.name === busName && b.routeFrom === selectedRouteFrom && b.routeTo === selectedRouteTo && b.type === selectedType);
+    if (!busObj) {
+      setError('Bus not found.');
+      setLoading(false);
+      return;
+    }
+    // Fetch already booked seats for this bus and date
+    try {
+      const params = new URLSearchParams({ bus: busObj.name, date: selectedDate });
+      const res = await fetch(`/api/bookings?${params.toString()}`);
+      const data = await res.json();
+      const bookedSeats = (data.bookings || []).flatMap((b: any) => b.seatNumbers || []);
+      setSeatSelectionBus(busObj);
+      setSeatSelectionDate(selectedDate);
+      setSeatSelectionCapacity(busObj.capacity || 40);
+      setSeatSelectionBookedSeats(bookedSeats);
+      setSeatSelectionSelectedSeats([]);
+      setShowSeatSelector(true);
+    } catch (err) {
+      setError('Failed to fetch booked seats.');
+    }
+    setLoading(false);
+  };
+
+  // When seat selection is confirmed
+  const handleSeatSelectionConfirm = () => {
+    if (!seatSelectionBus || !user) return;
     const details = {
       exam: selectedExam,
       city: selectedRouteFrom,
       routeFrom: selectedRouteFrom,
       routeTo: selectedRouteTo,
       type: selectedType,
-      date: selectedDate,
-      bus: busObj?.name || busName,
-      busNumber: busObj?.number || '',
-      userId: user.userId,
-      seatNumbers: selectedSeats,
-      contactNumber: busObj?.contactNumber || '',
-      timing: busObj?.timing || '',
-      price: busObj?.price || 0,
+      date: seatSelectionDate,
+      bus: seatSelectionBus.name,
+      busNumber: seatSelectionBus.number || '',
+              userId: user._id || user.email,
+      seatNumbers: seatSelectionSelectedSeats,
+      contactNumber: seatSelectionBus.contactNumber || '',
+      timing: seatSelectionBus.timing || '',
+      price: seatSelectionBus.price || 0,
     };
     setBookingDetails(details);
     setShowConfirmation(true);
-    setShowResults(false);
-    try {
-      const res = await fetch('/api/bookings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(details),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        setError(data.error || 'Booking failed.');
-        setLoading(false);
-        return;
-      }
-      const booking = await res.json();
-      setBookingStatus('Booking confirmed!');
-      setToast('Booking successful!');
-      setTimeout(() => setToast(null), 1200);
-      setTimeout(() => {
-        router.push('/bookings');
-        setBusToBook(null);
-        setSelectedSeats([]);
-      }, 1500);
-    } catch (err) {
-      setError('Network error. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    setShowSeatSelector(false);
+    setSelectedSeats(seatSelectionSelectedSeats);
   };
 
-  // Razorpay payment handler
+  // When seat is selected/deselected
+  const handleSeatSelect = (seat: string) => {
+    setSeatSelectionSelectedSeats(prev =>
+      prev.includes(seat) ? prev.filter(s => s !== seat) : [...prev, seat]
+    );
+  };
+
+  // When seat selection is cancelled
+  const handleSeatSelectionCancel = () => {
+    setShowSeatSelector(false);
+    setSeatSelectionBus(null);
+    setSeatSelectionDate('');
+    setSeatSelectionCapacity(40);
+    setSeatSelectionBookedSeats([]);
+    setSeatSelectionSelectedSeats([]);
+  };
+
   const handleRazorpayPayment = async () => {
-    setError(null);
-    setLoading(true);
-    if (!user) {
-      setError('You must be logged in to book.');
-      setLoading(false);
-      return;
-    }
-    const busObj = buses.find(b => b._id === busToBook?._id);
-    const amount = busObj?.price ? busObj.price * 100 : 50000; // Convert price to paise
+    if (!bookingDetails) return;
+    
     try {
-      // 1. Create order on backend
-      const orderRes = await fetch('/api/payment/order', {
+      const res = await fetch('/api/payment/order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount, currency: 'INR' }),
+        body: JSON.stringify({
+          amount: (bookingDetails.price || 0) * (bookingDetails.seatNumbers?.length || 1) * 100,
+          currency: 'INR',
+          bookingDetails: bookingDetails
+        })
       });
-      const orderData = await orderRes.json();
-      if (!orderData.orderId) {
-        setError('Payment order creation failed.');
-        setLoading(false);
-        return;
+      
+      const data = await res.json();
+      
+      if (data.success) {
+        const options = {
+          key: data.key,
+          amount: data.order.amount,
+          currency: data.order.currency,
+          name: 'Smartify Bus Booking',
+          description: `Bus ticket for ${bookingDetails.routeFrom} to ${bookingDetails.routeTo}`,
+          order_id: data.order.id,
+          handler: function (response: any) {
+            setBookingStatus('Payment successful! Your booking is confirmed.');
+            setToast('Payment successful!');
+            setTimeout(() => setToast(null), 3000);
+          },
+          prefill: {
+            name: user?.email || '',
+            email: user?.email || '',
+          },
+          theme: {
+            color: '#2563eb'
+          }
+        };
+        
+        const rzp = new (window as any).Razorpay(options);
+        rzp.open();
       }
-      // 2. Open Razorpay modal
-      const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-        amount: orderData.amount,
-        currency: orderData.currency,
-        name: 'Bus Booking',
-        description: 'Bus ticket booking payment',
-        order_id: orderData.orderId,
-        handler: function (response: any) {
-          handleBookNow(busToBook ? busToBook.name : '');
-        },
-        prefill: {
-          email: user?.email,
-        },
-        theme: {
-          color: '#3399cc'
-        }
-      };
-      // @ts-expect-error
-      const rzp = new window.Razorpay(options);
-      rzp.open();
     } catch (err) {
-      setError('Payment failed.');
-    } finally {
-      setLoading(false);
+      setError('Payment failed. Please try again.');
     }
   };
 
-  // UPI payment handler
   const handleUPIPayment = async () => {
-    setError(null);
-    setLoading(true);
-    if (!user) {
-      setError('You must be logged in to book.');
-      setLoading(false);
-      return;
-    }
-    if (!upiScreenshot && !upiTxnId) {
-      setError('Please upload a screenshot or enter transaction ID.');
-      setLoading(false);
-      return;
-    }
-    const busObj = buses.find(b => b._id === busToBook?._id);
-    // Upload screenshot if present
-    let screenshotUrl = '';
-    if (upiScreenshot) {
-      try {
-        const formData = new FormData();
-        formData.append('file', upiScreenshot);
-        const uploadRes = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData,
-        });
-        if (uploadRes.ok) {
-          const uploadData = await uploadRes.json();
-          console.log('Upload API response:', uploadData); // Debug log
-          screenshotUrl = uploadData.url || '';
-        } else {
-          screenshotUrl = upiScreenshot.name;
-        }
-      } catch (err) {
-        screenshotUrl = upiScreenshot.name;
-      }
-    }
-    const details = {
-      exam: selectedExam,
-      city: selectedRouteFrom,
-      routeFrom: selectedRouteFrom,
-      routeTo: selectedRouteTo,
-      type: selectedType,
-      date: selectedDate,
-      bus: busObj?.name || '',
-      busNumber: busObj?.number || '',
-      userId: user.userId,
-      seatNumbers: selectedSeats,
-      contactNumber: busObj?.contactNumber || '',
-      timing: busObj?.timing || '',
-      upiTxnId,
-      upiScreenshot: screenshotUrl,
-      status: 'pending',
-    };
-    console.log('Booking details to send:', details); // Debug log
-    setBookingDetails({ ...details, status: 'pending' as Booking['status'] });
-    setShowConfirmation(false);
-    setShowUPIModal(false);
-    setShowResults(false);
+    if (!bookingDetails) return;
+    
     try {
+      const formData = new FormData();
+      formData.append('bookingDetails', JSON.stringify(bookingDetails));
+      if (upiScreenshot) {
+        formData.append('screenshot', upiScreenshot);
+      }
+      formData.append('txnId', upiTxnId);
+      
       const res = await fetch('/api/bookings', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(details),
+        body: formData
       });
-      if (!res.ok) {
-        const data = await res.json();
-        setError(data.error || 'Booking failed.');
-        setLoading(false);
-        return;
+      
+      if (res.ok) {
+        setBookingStatus('UPI payment submitted! Your booking is pending confirmation.');
+        setShowUPIModal(false);
+        setToast('UPI payment submitted successfully!');
+        setTimeout(() => setToast(null), 3000);
+      } else {
+        setError('UPI payment failed. Please try again.');
       }
-      setPendingMsg('Your booking is pending. We will confirm after verifying your payment.');
-      setToast('Booking submitted for verification!');
-      setTimeout(() => setToast(null), 1200);
-      setTimeout(() => {
-        router.push('/bookings');
-        setBusToBook(null);
-        setSelectedSeats([]);
-      }, 2000);
     } catch (err) {
-      setError('Network error. Please try again.');
-    } finally {
-      setLoading(false);
+      setError('UPI payment failed. Please try again.');
     }
   };
 
   const handleDownloadTicket = () => {
     if (!bookingDetails) return;
+    
     const doc = new jsPDF();
+    
     // Header
-    doc.setFillColor(37, 99, 235); // Blue
-    doc.rect(0, 0, 210, 30, 'F');
     doc.setFontSize(20);
-    doc.setTextColor(255, 255, 255);
-    doc.text('🚌 Bus Ticket Invoice', 10, 20);
-
-    // Section: Booking Details
-    doc.setFontSize(13);
-    doc.setTextColor(40, 40, 40);
-    doc.text('Booking Details', 10, 38);
-    doc.setDrawColor(37, 99, 235);
-    doc.line(10, 40, 200, 40);
-
-    let y = 48;
-    doc.setFontSize(11);
-    doc.text(`Exam:`, 10, y); doc.text(`${bookingDetails.exam || ''}`, 50, y);
-    y += 8;
-    doc.text(`Date:`, 10, y); doc.text(`${bookingDetails.date || ''}`, 50, y);
-    y += 8;
-    doc.text(`Bus:`, 10, y); doc.text(`${bookingDetails.bus || ''} (${bookingDetails.busNumber || ''})`, 50, y);
-    y += 8;
-    doc.text(`Route:`, 10, y); doc.text(`${bookingDetails.routeFrom || ''} → ${bookingDetails.routeTo || ''}`, 50, y);
-    y += 8;
-    doc.text(`Timing:`, 10, y); doc.text(`${bookingDetails.timing || ''}`, 50, y);
-    y += 8;
-    doc.text(`Contact:`, 10, y); doc.text(`${bookingDetails.contactNumber || ''}`, 50, y);
-    y += 8;
-    doc.text(`Seats:`, 10, y); doc.text(`${Array.isArray(bookingDetails.seatNumbers) ? bookingDetails.seatNumbers.join(', ') : ''}`, 50, y);
-    y += 12;
-
-    // Price Section
-    doc.setFontSize(13);
     doc.setTextColor(37, 99, 235);
-    doc.text('Payment Summary', 10, y);
-    doc.setDrawColor(251, 191, 36); // Yellow accent
-    doc.line(10, y + 2, 200, y + 2);
-    y += 10;
+    doc.text('Exam Bus Ticket', 10, 22);
+    doc.setDrawColor(37, 99, 235);
+    doc.line(10, 28, 200, 28);
+
+    // Ticket Details
     doc.setFontSize(12);
     doc.setTextColor(40, 40, 40);
-    doc.text(`Price per Seat:`, 10, y); doc.text(`₹${bookingDetails.price || 0}`, 50, y);
-    y += 8;
-    doc.setFontSize(14);
-    doc.setTextColor(200, 40, 40);
-    doc.text(`Total:`, 10, y); doc.text(`₹${(bookingDetails.price || 0) * (Array.isArray(bookingDetails.seatNumbers) ? bookingDetails.seatNumbers.length : 1)}`, 50, y);
-    y += 16;
+    let y = 38;
+    const details = [
+      ['Exam:', bookingDetails.exam || ''],
+      ['Route:', `${bookingDetails.routeFrom} → ${bookingDetails.routeTo}`],
+      ['Date:', bookingDetails.date || ''],
+      ['Bus:', `${bookingDetails.bus} ${bookingDetails.busNumber ? `(${bookingDetails.busNumber})` : ''}`],
+      ['Type:', bookingDetails.type || ''],
+      ['Timing:', bookingDetails.timing || ''],
+      ['Seats:', bookingDetails.seatNumbers?.join(', ') || ''],
+      ['Price:', `₹${bookingDetails.price || 0}`],
+      ['Total:', `₹${(bookingDetails.price || 0) * (bookingDetails.seatNumbers?.length || 1)}`]
+    ];
+    
+    details.forEach((item) => {
+      doc.setFont('helvetica', 'bold');
+      doc.text(item[0], 15, y);
+      doc.setFont('helvetica', 'normal');
+      doc.text(item[1], 60, y);
+      y += 9;
+    });
 
     // Footer
-    doc.setFontSize(12);
-    doc.setTextColor(37, 99, 235);
-    doc.text('Thank you for booking with BusBooking!', 10, y);
+    y += 8;
+    doc.setDrawColor(251, 191, 36);
+    doc.line(10, y, 200, y);
+    y += 8;
+    doc.setFontSize(11);
     doc.setTextColor(120, 120, 120);
-    doc.text('For support: support@busbooking.com', 10, y + 8);
+    doc.text('Thank you for booking with Smartify!', 10, y);
+    doc.text('For support: support@smartify.com', 10, y + 8);
 
-    doc.save('ticket.pdf');
+    doc.save('exam-ticket.pdf');
+    setToast('Ticket downloaded!');
+    setTimeout(() => setToast(null), 2000);
   };
 
-  const selectedBusObj = buses.find(
-    b => b.routeFrom === selectedRouteFrom && b.routeTo === selectedRouteTo && b.type === selectedType && b.date === formattedSelectedDate
+  const handleDirectBooking = async () => {
+    if (!bookingDetails) return;
+    setBookingError(null);
+    try {
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingDetails)
+      });
+      if (res.ok) {
+        setShowBookingSuccess(true);
+        setShowConfirmation(false);
+        setBookingDetails(null);
+        setSelectedSeats([]);
+      } else {
+        const data = await res.json();
+        setBookingError(data.error || 'Booking failed.');
+      }
+    } catch (err) {
+      setBookingError('Booking failed. Please try again.');
+    }
+  };
+
+  // UPI payment handler
+  const handleUPIPaymentSubmit = async () => {
+    if (!bookingDetails) return;
+    setUpiError(null);
+    if (!upiTxnId) {
+      setUpiError('Please enter your UPI transaction/reference ID.');
+      return;
+    }
+    try {
+      const formData = new FormData();
+      formData.append('bookingDetails', JSON.stringify({ ...bookingDetails, status: 'pending' }));
+      formData.append('txnId', upiTxnId);
+      if (upiScreenshot) {
+        formData.append('screenshot', upiScreenshot);
+      }
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        body: formData
+      });
+      if (res.ok) {
+        setShowBookingSuccess(true);
+        setShowUPIModal(false);
+        setShowConfirmation(false);
+        setBookingDetails(null);
+        setSelectedSeats([]);
+        setUpiTxnId('');
+        setUpiScreenshot(null);
+      } else {
+        const data = await res.json();
+        setUpiError(data.error || 'Payment submission failed.');
+      }
+    } catch (err) {
+      setUpiError('Payment submission failed. Please try again.');
+    }
+  };
+
+  const renderBookingForm = () => (
+    <Card className="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-8 md:p-10 border border-gray-100">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-2xl md:text-3xl font-semibold text-gray-900 mb-2">
+          <FileText className="h-7 w-7 text-blue-600" />
+          Book Exam Bus
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="text-sm font-medium text-gray-600 mb-1 block">Select Exam</label>
+              <select
+                value={selectedExam}
+                onChange={(e) => setSelectedExam(e.target.value)}
+                className="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition placeholder-gray-400"
+                required
+              >
+                <option value="">Choose an exam</option>
+                {exams.map((exam) => (
+                  <option key={exam.name} value={exam.name}>{exam.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-600 mb-1 block">Bus Type</label>
+              <select
+                value={selectedType}
+                onChange={(e) => setSelectedType(e.target.value)}
+                className="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition placeholder-gray-400"
+                required
+              >
+                {BUS_TYPES.map((type) => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-600 mb-1 block">From</label>
+              <select
+                value={selectedRouteFrom}
+                onChange={(e) => setSelectedRouteFrom(e.target.value)}
+                className="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition placeholder-gray-400"
+                required
+              >
+                <option value="">Select departure city</option>
+                {cities.map((city) => (
+                  <option key={city._id || city.name} value={city.name}>{city.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-600 mb-1 block">To</label>
+              <select
+                value={selectedRouteTo}
+                onChange={(e) => setSelectedRouteTo(e.target.value)}
+                className="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition placeholder-gray-400"
+                required
+              >
+                <option value="">Select destination city</option>
+                {cities.map((city) => (
+                  <option key={city._id || city.name} value={city.name}>{city.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="md:col-span-2">
+              <label className="text-sm font-medium text-gray-600 mb-1 block">Date of Journey</label>
+              <Input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                required
+                min={new Date().toISOString().split('T')[0]}
+                className="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition placeholder-gray-400"
+              />
+            </div>
+          </div>
+
+          {error && (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-600 text-sm flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" />
+                <span>{error}</span>
+              </p>
+            </div>
+          )}
+
+          <Button
+            type="submit"
+            className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold text-lg shadow-md flex items-center justify-center gap-2"
+          >
+            <Bus className="h-5 w-5" />
+            Search Buses
+            <ArrowRight className="h-5 w-5" />
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 
-  return (
-    <div style={{ minHeight: '100vh', background: theme === 'light' ? palette.bgLight : palette.bgDark, fontFamily: 'Inter, sans-serif', color: theme === 'light' ? palette.textLight : palette.textDark, padding: '48px 0' }}>
-      <div style={{ maxWidth: 420, margin: '0 auto', background: theme === 'light' ? palette.card : palette.cardDark, borderRadius: 18, padding: '36px 32px', boxShadow: '0 2px 12px rgba(0,0,0,0.10)' }}>
-        <h2 style={{ fontWeight: 800, fontSize: '2rem', marginBottom: 24, textAlign: 'center', color: palette.primary }}>Book for Exam</h2>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
-          <div>
-            <label style={{ fontWeight: 600, marginBottom: 6, display: 'block', color: palette.primary }}>Select Exam</label>
-            <select value={selectedExam} onChange={e => setSelectedExam(e.target.value)} required style={{ width: '100%', padding: 10, borderRadius: 8, border: `1.5px solid ${palette.primary}`, background: theme === 'light' ? '#e0f0ff' : palette.cardDark, color: palette.primary, fontWeight: 600 }}>
-              <option value="" disabled>Select an exam</option>
-              {exams.map(exam => (
-                <option key={exam.name} value={exam.name}>{exam.name}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label style={{ fontWeight: 600, marginBottom: 6, display: 'block', color: palette.primary }}>Route From</label>
-            <select value={selectedRouteFrom} onChange={e => setSelectedRouteFrom(e.target.value)} required style={{ width: '100%', padding: 10, borderRadius: 8, border: `1.5px solid ${palette.primary}`, background: theme === 'light' ? '#e0f0ff' : palette.cardDark, color: palette.primary, fontWeight: 600 }}>
-              <option value="" disabled>Select starting city</option>
-              {cities.map(city => (
-                <option key={city._id || city.name} value={city.name}>{city.name}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label style={{ fontWeight: 600, marginBottom: 6, display: 'block', color: palette.primary }}>Route To</label>
-            <select value={selectedRouteTo} onChange={e => setSelectedRouteTo(e.target.value)} required style={{ width: '100%', padding: 10, borderRadius: 8, border: `1.5px solid ${palette.primary}`, background: theme === 'light' ? '#e0f0ff' : palette.cardDark, color: palette.primary, fontWeight: 600 }}>
-              <option value="" disabled>Select destination city</option>
-              {cities.map(city => (
-                <option key={city._id || city.name} value={city.name}>{city.name}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label style={{ fontWeight: 600, marginBottom: 6, display: 'block', color: palette.primary }}>Type of Bus</label>
-            <select value={selectedType} onChange={e => setSelectedType(e.target.value)} required style={{ width: '100%', padding: 10, borderRadius: 8, border: `1.5px solid ${palette.primary}`, background: theme === 'light' ? '#e0f0ff' : palette.cardDark, color: palette.primary, fontWeight: 600 }}>
-              {BUS_TYPES.map(type => (
-                <option key={type} value={type}>{type}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label style={{ fontWeight: 600, marginBottom: 6, display: 'block', color: palette.primary }}>Select Date</label>
-            <input type="date" value={selectedDate} onChange={e => setSelectedDate(e.target.value)} required style={{ width: '100%', padding: 10, borderRadius: 8, border: `1.5px solid ${palette.primary}`, background: theme === 'light' ? palette.card : palette.cardDark, color: theme === 'light' ? palette.textLight : palette.textDark, fontWeight: 600 }} />
-          </div>
-          <button type="submit" disabled={loading} style={{ padding: '14px 0', borderRadius: '24px', background: `linear-gradient(90deg, ${palette.accent} 0%, ${palette.primary} 100%)`, color: '#fff', fontWeight: 700, fontSize: '1.08rem', border: 'none', boxShadow: '0 2px 12px rgba(0,0,0,0.10)', cursor: loading ? 'not-allowed' : 'pointer', marginTop: 8 }}>{loading ? <Spinner size={22} label="Booking..." /> : 'Search Buses'}</button>
-        </form>
-        {error && <div style={{ color: '#ff5e62', marginTop: 12, textAlign: 'center' }}>{error}</div>}
-        {showResults && (
-          <div style={{ marginTop: 32 }}>
-            <h3 style={{ fontWeight: 700, fontSize: '1.2rem', marginBottom: 16, color: palette.primary }}>Available Buses</h3>
-            {(() => {
-              // Debug logs
-              console.log('Buses:', buses);
-              console.log('Selected:', selectedExam, selectedRouteFrom, selectedRouteTo, selectedType, formattedSelectedDate);
-              // Filter buses by exam, route, type, date (case-insensitive, formatted date)
-              const filteredBuses = buses.filter(bus =>
-                bus.exams &&
-                bus.exams
-                  .filter((e: any) => typeof e === 'string')
-                  .map((e: string) => e.toLowerCase())
-                  .includes(selectedExam.toLowerCase()) &&
-                (bus.routeFrom || '').toLowerCase() === selectedRouteFrom.toLowerCase() &&
-                (bus.routeTo || '').toLowerCase() === selectedRouteTo.toLowerCase() &&
-                (bus.type || '').toLowerCase() === selectedType.toLowerCase() &&
-                bus.date === formattedSelectedDate
-              );
-              // For each bus, count booked seats
-              const availableBuses: any[] = [];
-              const fullyBookedBuses: any[] = [];
-              filteredBuses.forEach(bus => {
-                const bookingsForBus = allBookings.filter(b =>
-                  b.bus === bus.name &&
-                  b.routeFrom === bus.routeFrom &&
-                  b.routeTo === bus.routeTo &&
-                  b.date === bus.date
-                );
-                const bookedSeats = bookingsForBus.reduce((acc, b) => acc + (Array.isArray(b.seatNumbers) ? b.seatNumbers.length : 0), 0);
-                if (bookedSeats >= (bus.capacity || 0)) {
-                  fullyBookedBuses.push(bus);
-                } else {
-                  availableBuses.push(bus);
-                }
-              });
-              return <>
-                {availableBuses.length === 0 ? (
-                  <div style={{ color: palette.secondary, fontSize: 16 }}>No buses found for the selected exam, route, and date.</div>
-                ) : (
-                  availableBuses.map(bus => (
-                    <div key={bus._id} style={{ background: theme === 'light' ? palette.bgLight : 'rgba(255,255,255,0.10)', borderRadius: 14, padding: 18, marginBottom: 12 }}>
-                      <div style={{ fontWeight: 600, color: palette.primary }}>{bus.name}</div>
-                      <div style={{ fontSize: 15, color: theme === 'light' ? palette.secondary : palette.textDark }}>{bus.routeFrom || ''} → {bus.routeTo || ''}</div>
-                      <div style={{ fontSize: 14, color: theme === 'light' ? palette.secondary : palette.textDark }}>Type: {bus.type || ''}</div>
-                      <div style={{ fontSize: 14, color: theme === 'light' ? palette.secondary : palette.textDark }}>Date: {selectedDate}</div>
-                      <div style={{ fontSize: 14, color: theme === 'light' ? palette.secondary : palette.textDark }}><b>Price per Seat:</b> ₹{bus.price || 0}</div>
-                      <button onClick={() => setBusToBook(bus)} disabled={loading} style={{ display: 'inline-block', marginTop: 10, padding: '8px 24px', borderRadius: '18px', background: `linear-gradient(90deg, ${palette.accent} 0%, ${palette.primary} 100%)`, color: '#fff', fontWeight: 600, border: 'none', cursor: loading ? 'not-allowed' : 'pointer' }}>Book Now</button>
-                    </div>
-                  ))
-                )}
-                {fullyBookedBuses.length > 0 && <>
-                  <h3 style={{ fontWeight: 700, fontSize: '1.1rem', margin: '32px 0 12px 0', color: '#b23b3b' }}>Fully Booked Buses</h3>
-                  {fullyBookedBuses.map(bus => (
-                    <div key={bus._id} style={{ background: '#f8d7da', borderRadius: 14, padding: 18, marginBottom: 12, color: '#721c24' }}>
-                      <div style={{ fontWeight: 600 }}>{bus.name}</div>
-                      <div>{bus.routeFrom || ''} → {bus.routeTo || ''}</div>
-                      <div>Type: {bus.type || ''}</div>
-                      <div>Date: {selectedDate}</div>
-                      <div><b>Price per Seat:</b> ₹{bus.price}</div>
-                      <div style={{ fontWeight: 700, color: '#b23b3b', marginTop: 6 }}>Fully Booked</div>
-                    </div>
-                  ))}
-                </>}
-              </>;
-            })()}
-          </div>
-        )}
-        {showConfirmation && bookingDetails && (
-          <div style={{ marginTop: 32, background: theme === 'light' ? palette.bgLight : 'rgba(255,255,255,0.13)', borderRadius: 16, padding: 24, textAlign: 'center', color: theme === 'light' ? palette.textLight : palette.textDark }}>
-            <h3 style={{ fontWeight: 700, fontSize: '1.2rem', marginBottom: 16, color: palette.primary }}>Booking Confirmed!</h3>
-            <div style={{ marginBottom: 12 }}>
-              <div><b>Exam:</b> {bookingDetails.exam}</div>
-              <div><b>Route:</b> {bookingDetails.routeFrom} → {bookingDetails.routeTo}</div>
-              <div><b>Type:</b> {bookingDetails.type || ''}</div>
-              <div><b>Date:</b> {bookingDetails.date}</div>
-              <div><b>Bus:</b> {bookingDetails.bus}</div>
-              <div><b>Seats:</b> {Array.isArray(bookingDetails.seatNumbers) ? bookingDetails.seatNumbers.join(', ') : ''}</div>
-              <div><b>Price per Seat:</b> ₹{bookingDetails.price || 0}</div>
-              <div style={{ fontWeight: 700, color: palette.primary, fontSize: 18, marginTop: 8 }}><b>Total Payment:</b> ₹{(bookingDetails.price || 0) * (Array.isArray(bookingDetails.seatNumbers) ? bookingDetails.seatNumbers.length : 1)}</div>
-            </div>
-            <button onClick={handleDownloadTicket} style={{ padding: '10px 28px', borderRadius: '18px', background: `linear-gradient(90deg, ${palette.accent} 0%, ${palette.primary} 100%)`, color: '#fff', fontWeight: 600, border: 'none', cursor: 'pointer', marginTop: 10 }}>Download Ticket</button>
-            {bookingStatus && <div style={{ marginTop: 16, color: '#0f0', fontWeight: 600 }}>{bookingStatus}</div>}
-          </div>
-        )}
-        {busToBook && (
-          <div style={{ marginTop: 24 }}>
-            <SeatSelector userId={user?.email || ''} busId={busToBook._id || ''} capacity={busToBook.capacity || 0} onSelect={setSelectedSeats} />
-            <button
-              onClick={() => selectedSeats.length > 0 && setShowUPIModal(true)}
-              disabled={selectedSeats.length === 0 || loading}
-              style={{ marginTop: 16, padding: '10px 28px', borderRadius: '18px', background: `linear-gradient(90deg, ${palette.accent} 0%, ${palette.primary} 100%)`, color: '#fff', fontWeight: 600, border: 'none', cursor: selectedSeats.length === 0 || loading ? 'not-allowed' : 'pointer' }}
-            >
-              Pay via UPI
-            </button>
-          </div>
-        )}
-        {showUPIModal && (
-          <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.4)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ background: '#fff', borderRadius: 18, padding: 32, maxWidth: 400, width: '100%', boxShadow: '0 2px 16px rgba(0,0,0,0.18)', textAlign: 'center', position: 'relative' }}>
-              <button onClick={() => setShowUPIModal(false)} style={{ position: 'absolute', top: 12, right: 18, background: 'none', border: 'none', fontSize: 22, cursor: 'pointer' }}>×</button>
-              <h3 style={{ fontWeight: 700, fontSize: '1.3rem', marginBottom: 12, color: '#2563eb' }}>Pay via UPI</h3>
-              <Image src="/upi_qr.png" alt="UPI QR" width={200} height={200} style={{ margin: '0 auto', borderRadius: 12 }} />
-              <div style={{ margin: '12px 0', fontWeight: 600, color: '#333' }}>UPI ID: gamingbeast2026-1@okhdfcbank</div>
-              <div style={{ fontSize: 14, color: '#888', marginBottom: 10 }}>Scan the QR code or pay to the UPI ID above using any UPI app.</div>
-              <div style={{ margin: '18px 0 8px 0', fontWeight: 600 }}>Upload Payment Screenshot</div>
-              <input type="file" accept="image/*" onChange={e => setUpiScreenshot(e.target.files?.[0] || null)} style={{ marginBottom: 10 }} />
-              <div style={{ margin: '12px 0 8px 0', fontWeight: 600 }}>Or Enter UPI Transaction ID</div>
-              <input type="text" value={upiTxnId} onChange={e => setUpiTxnId(e.target.value)} placeholder="Transaction ID" style={{ width: '100%', padding: 8, borderRadius: 8, border: '1.5px solid #2563eb', marginBottom: 16 }} />
-              <div style={{ margin: '16px 0', fontWeight: 700, color: '#2563eb', fontSize: 18 }}>
-                Total Payment: ₹{busToBook && selectedSeats.length > 0 ? ((busToBook.price || 0) * selectedSeats.length) : 0}
-              </div>
-              <button onClick={handleUPIPayment} disabled={loading} style={{ width: '100%', padding: '12px 0', borderRadius: 12, background: `linear-gradient(90deg, #36b37e 0%, #2563eb 100%)`, color: '#fff', fontWeight: 700, fontSize: '1.08rem', border: 'none', boxShadow: '0 2px 12px rgba(0,0,0,0.10)', cursor: loading ? 'not-allowed' : 'pointer', marginTop: 8 }}>Submit Payment</button>
-            </div>
-          </div>
-        )}
-        {pendingMsg && (
-          <div style={{ marginTop: 32, background: '#fffbe6', borderRadius: 16, padding: 24, textAlign: 'center', color: '#b26a00', fontWeight: 600 }}>{pendingMsg}</div>
-        )}
-        {toast && <div style={{ position: 'fixed', top: 32, right: 32, background: palette.accent, color: '#222', padding: '12px 28px', borderRadius: 12, fontWeight: 700, zIndex: 1000 }}>{toast}</div>}
+  const renderResults = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-gray-900 flex items-center space-x-2">
+          <Bus className="h-6 w-6" />
+          <span>Available Buses</span>
+        </h2>
+        <Button
+          onClick={() => setShowResults(false)}
+          className="bg-gray-600 hover:bg-gray-700 text-white"
+          size="sm"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Search
+        </Button>
       </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {buses
+          .filter(bus => 
+            bus.routeFrom === selectedRouteFrom && 
+            bus.routeTo === selectedRouteTo && 
+            bus.type === selectedType
+          )
+          .map((bus, index) => (
+            <Card key={bus._id || index} className="hover:shadow-lg transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">{bus.name}</h3>
+                  <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                    {bus.type}
+                  </span>
+                </div>
+                
+                <div className="space-y-2 text-sm text-gray-600 mb-4">
+                  <div className="flex items-center space-x-2">
+                    <MapPin className="h-4 w-4" />
+                    <span>{bus.routeFrom} → {bus.routeTo}</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Calendar className="h-4 w-4" />
+                    <span>{selectedDate}</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Clock className="h-4 w-4" />
+                    <span>{bus.timing || 'TBD'}</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <User className="h-4 w-4" />
+                    <span>Capacity: {bus.capacity || 'N/A'}</span>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="text-2xl font-bold text-green-600">
+                    ₹{bus.price || 0}
+                  </div>
+                  <Button
+                    onClick={() => handleBookNow(bus.name)}
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                    size="sm"
+                  >
+                    Book Now
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+      </div>
+
+      {buses.filter(bus => 
+        bus.routeFrom === selectedRouteFrom && 
+        bus.routeTo === selectedRouteTo && 
+        bus.type === selectedType
+      ).length === 0 && (
+        <Card className="text-center py-12">
+          <Bus className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">No buses available</h3>
+          <p className="text-gray-600 mb-6">No buses found for the selected criteria</p>
+          <Button
+            onClick={() => setShowResults(false)}
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            Modify Search
+          </Button>
+        </Card>
+      )}
+    </div>
+  );
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center p-4">
+        <Card className="text-center py-12 max-w-md">
+          <User className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">Login Required</h3>
+          <p className="text-gray-600 mb-6">Please login to book exam buses</p>
+          <Button
+            onClick={() => router.push('/login')}
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            Go to Login
+          </Button>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4">
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed top-8 right-8 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center space-x-2">
+          <CheckCircle className="h-5 w-5" />
+          <span className="font-medium">{toast}</span>
+          <button 
+            onClick={() => setToast(null)}
+            className="ml-2 hover:bg-green-600 rounded-full p-1"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
+      <div className="max-w-6xl mx-auto">
+        {!showResults ? renderBookingForm() : renderResults()}
+      </div>
+
+      {/* Seat Selection Modal */}
+      {showSeatSelector && seatSelectionBus && (
+        <SeatSelector
+          capacity={seatSelectionCapacity}
+          bookedSeats={seatSelectionBookedSeats}
+          selectedSeats={seatSelectionSelectedSeats}
+          onSelect={handleSeatSelect}
+          onConfirm={handleSeatSelectionConfirm}
+          onCancel={handleSeatSelectionCancel}
+        />
+      )}
+
+      {/* Payment Confirmation Modal */}
+      {showConfirmation && bookingDetails && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">Confirm Booking & Pay via UPI</h2>
+            <div className="mb-4 space-y-1">
+              <p><b>Route:</b> {bookingDetails.routeFrom} → {bookingDetails.routeTo}</p>
+              <p><b>Date:</b> {bookingDetails.date}</p>
+              <p><b>Bus:</b> {bookingDetails.bus}</p>
+              <p><b>Seats:</b> {bookingDetails.seatNumbers.join(', ')}</p>
+              <p><b>Total:</b> ₹{(bookingDetails.price || 0) * bookingDetails.seatNumbers.length}</p>
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={() => { setShowUPIModal(true); setShowConfirmation(false); }} className="bg-blue-600 text-white">Pay via UPI/QR</Button>
+              <Button onClick={() => setShowConfirmation(false)} className="bg-gray-200 text-gray-700 hover:bg-gray-300">Cancel</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* UPI/QR Payment Modal */}
+      {showUPIModal && bookingDetails && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">Pay via UPI/QR</h2>
+            <div className="mb-4 flex flex-col items-center">
+              <Image src="/upi_qr.png" alt="UPI QR Code" width={160} height={160} className="w-40 h-40 mb-2 border rounded" />
+              <p className="text-gray-700 text-sm mb-2">Scan the QR code above using any UPI app to pay.</p>
+              <p className="text-gray-700 text-sm mb-2">After payment, enter your UPI transaction/reference ID and (optionally) upload a screenshot.</p>
+            </div>
+            <div className="mb-3">
+              <label className="block text-sm font-medium text-gray-700 mb-1">UPI Transaction/Reference ID</label>
+              <input
+                type="text"
+                value={upiTxnId}
+                onChange={e => setUpiTxnId(e.target.value)}
+                className="w-full border border-gray-300 rounded px-3 py-2 mb-2"
+                placeholder="Enter UPI txn/reference ID"
+              />
+              <label className="block text-sm font-medium text-gray-700 mb-1">Upload Payment Screenshot (optional)</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={e => setUpiScreenshot(e.target.files?.[0] || null)}
+                className="w-full border border-gray-300 rounded px-3 py-2"
+              />
+            </div>
+            {upiError && <div className="mb-2 text-red-600 text-sm">{upiError}</div>}
+            <div className="flex gap-2">
+              <Button onClick={handleUPIPaymentSubmit} className="bg-blue-600 text-white">Submit Payment</Button>
+              <Button onClick={() => { setShowUPIModal(false); setShowConfirmation(true); setUpiTxnId(''); setUpiScreenshot(null); setUpiError(null); }} className="bg-gray-200 text-gray-700 hover:bg-gray-300">Cancel</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Booking Success Modal */}
+      {showBookingSuccess && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md text-center">
+            <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold mb-2">Payment Submitted!</h2>
+            <p className="mb-4">Your payment details have been submitted. Your booking is pending confirmation.</p>
+            <Button onClick={() => setShowBookingSuccess(false)} className="bg-blue-600 text-white">Close</Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

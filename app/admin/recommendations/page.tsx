@@ -22,52 +22,58 @@ export default function RecommendationsPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div style={{ color: '#94a3b8', padding: 32 }}>Loading recommendations...</div>;
-  if (error) return <div style={{ color: '#ef4444', padding: 32 }}>{error}</div>;
-
   return (
-    <div style={{ padding: 32 }}>
-      <h2 style={{ color: 'white', fontSize: 24, fontWeight: 700, marginBottom: 24 }}>Recommendations</h2>
-      {recommendations.length === 0 ? (
-        <div style={{ color: '#94a3b8' }}>No recommendations found.</div>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-          {recommendations.map(rec => (
-            <div key={rec._id} style={{ background: '#334155', borderRadius: 12, padding: 24, color: 'white', display: 'flex', alignItems: 'center', gap: 24, justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-                <span style={{ fontSize: 32 }}>{rec.icon}</span>
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: 18 }}>{rec.route}</div>
-                  <div style={{ color: '#94a3b8', fontSize: 15 }}>{rec.desc}</div>
+    <div className="space-y-8">
+      <div className="flex items-center gap-4 mb-6 p-8 bg-gradient-to-r from-yellow-500 to-pink-500 text-white rounded-2xl shadow-lg">
+        <span className="text-3xl">⭐</span>
+        <h1 className="text-2xl font-bold">Recommendations</h1>
+      </div>
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
+        {loading ? (
+          <div className="text-gray-400 text-center py-8">Loading recommendations...</div>
+        ) : error ? (
+          <div className="text-red-500 text-center py-8">{error}</div>
+        ) : recommendations.length === 0 ? (
+          <div className="text-gray-400 text-center py-8">No recommendations found.</div>
+        ) : (
+          <div className="grid gap-6">
+            {recommendations.map(rec => (
+              <div key={rec._id} className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-xl p-6">
+                <div className="flex items-center gap-6">
+                  <span className="text-3xl">{rec.icon}</span>
+                  <div>
+                    <div className="font-semibold text-lg text-gray-900">{rec.route}</div>
+                    <div className="text-gray-500 text-sm">{rec.desc}</div>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold rounded-lg px-4 py-2 transition"
+                    onClick={() => alert('Edit feature coming soon!')}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg px-4 py-2 transition"
+                    onClick={async () => {
+                      if (confirm('Are you sure you want to delete this recommendation?')) {
+                        const res = await fetch(`/api/recommendations/${rec._id}`, { method: 'DELETE' });
+                        if (res.ok) {
+                          setRecommendations(recommendations.filter(r => r._id !== rec._id));
+                        } else {
+                          alert('Failed to delete recommendation.');
+                        }
+                      }
+                    }}
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: 12 }}>
-                <button
-                  style={{ background: '#fbbf24', color: '#222', border: 'none', borderRadius: 6, padding: '8px 16px', fontWeight: 600, cursor: 'pointer' }}
-                  onClick={() => alert('Edit feature coming soon!')}
-                >
-                  Edit
-                </button>
-                <button
-                  style={{ background: '#ef4444', color: 'white', border: 'none', borderRadius: 6, padding: '8px 16px', fontWeight: 600, cursor: 'pointer' }}
-                  onClick={async () => {
-                    if (confirm('Are you sure you want to delete this recommendation?')) {
-                      const res = await fetch(`/api/recommendations/${rec._id}`, { method: 'DELETE' });
-                      if (res.ok) {
-                        setRecommendations(recommendations.filter(r => r._id !== rec._id));
-                      } else {
-                        alert('Failed to delete recommendation.');
-                      }
-                    }
-                  }}
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 } 

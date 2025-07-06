@@ -11,7 +11,6 @@ const adminNavLinks = [
   { label: 'Booking Management', href: '/admin/bookings', icon: '📋' },
   { label: 'Bus Management', href: '/admin/buses', icon: '🚌' },
   { label: 'City Management', href: '/admin/cities', icon: '🌆' },
-  { label: 'Analytics', href: '/admin/analytics', icon: '📈' },
   { label: 'Recommendations', href: '/admin/recommendations', icon: '⭐' },
 ];
 

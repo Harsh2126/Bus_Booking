@@ -12,38 +12,17 @@ export default function AdminUsersPage() {
   }, []);
 
   return (
-    <div>
-      <div style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'space-between', 
-        marginBottom: '24px',
-        padding: '20px',
-        background: '#334155',
-        borderRadius: '12px',
-        border: '1px solid #475569'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <span style={{ fontSize: '24px' }}>👥</span>
-          <h2 style={{ fontSize: '20px', fontWeight: '600', margin: 0, color: 'white' }}>
-            User Management
-          </h2>
+    <div className="space-y-8">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-6">
+        <div className="flex items-center gap-4">
+          <span className="text-3xl">👥</span>
+          <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
         </div>
-        <div style={{ 
-          fontWeight: '600', 
-          fontSize: '16px',
-          color: '#94a3b8'
-        }}>
-          Total: {total !== null ? total : '...'}
+        <div className="font-semibold text-lg text-gray-500">
+          Total Users: {total !== null ? total : '...'}
         </div>
       </div>
-      
-      <div style={{ 
-        background: '#334155',
-        borderRadius: '16px',
-        border: '1px solid #475569',
-        overflow: 'hidden'
-      }}>
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-0 overflow-x-auto">
         <AdminUserManager />
       </div>
     </div>

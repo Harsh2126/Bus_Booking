@@ -1,4 +1,5 @@
 "use client";
+import Image from 'next/image';
 import { useContext, useEffect, useState } from 'react';
 import { ThemeContext } from '../ThemeProvider';
 
@@ -149,9 +150,7 @@ export default function AdminBookingManager() {
                   <td style={{ padding: 10 }}>{(b.price || 0) * (Array.isArray(b.seatNumbers) ? b.seatNumbers.length : 1)}</td>
                   <td style={{ padding: 10 }}>
                     {b.upiScreenshot && b.upiScreenshot.startsWith('/uploads/') ? (
-                      <a href={b.upiScreenshot} target="_blank" rel="noopener noreferrer">
-                        <img src={b.upiScreenshot} alt="Payment Screenshot" style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 6, border: '1px solid #475569', boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }} />
-                      </a>
+                      <Image src={b.upiScreenshot} alt="Payment Screenshot" width={48} height={48} style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 6, border: '1px solid #475569', boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }} />
                     ) : b.upiScreenshot ? b.upiScreenshot : b.upiTxnId ? b.upiTxnId : '-'}
                   </td>
                   <td style={{ padding: 10 }}>{b.upiTxnId || '-'}</td>

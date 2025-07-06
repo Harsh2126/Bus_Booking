@@ -1,4 +1,6 @@
+import { writeFile } from 'fs/promises';
 import { NextRequest, NextResponse } from 'next/server';
+import path from 'path';
 import Booking from '../models/Booking';
 import Bus from '../models/Bus';
 import dbConnect from '../models/db';
@@ -27,10 +29,45 @@ export async function GET(req: NextRequest) {
 // POST /api/bookings
 export async function POST(req: NextRequest) {
   await dbConnect();
-  const data = await req.json();
+  let data: any = null;
+  let upiScreenshot = undefined;
+  let upiTxnId = undefined;
+
+  // Check if multipart/form-data (for UPI/QR with screenshot)
+  const contentType = req.headers.get('content-type') || '';
+  if (contentType.includes('multipart/form-data')) {
+    const formData = await req.formData();
+    const detailsStr = formData.get('bookingDetails');
+    if (!detailsStr || typeof detailsStr !== 'string') {
+      return NextResponse.json({ error: 'Missing booking details' }, { status: 400 });
+    }
+    try {
+      data = JSON.parse(detailsStr);
+    } catch {
+      return NextResponse.json({ error: 'Invalid booking details' }, { status: 400 });
+    }
+    upiTxnId = formData.get('txnId');
+    const screenshotFile = formData.get('screenshot');
+    if (screenshotFile && typeof screenshotFile === 'object' && 'arrayBuffer' in screenshotFile) {
+      // Save screenshot to /public/uploads/
+      const buffer = Buffer.from(await screenshotFile.arrayBuffer());
+      const ext = (screenshotFile.name || 'png').split('.').pop();
+      const filename = `${Date.now()}-${screenshotFile.name || 'upi'}.${ext}`;
+      const uploadPath = path.join(process.cwd(), 'public', 'uploads', filename);
+      await writeFile(uploadPath, buffer);
+      upiScreenshot = `/uploads/${filename}`;
+    }
+  } else {
+    // Fallback: normal JSON
+    data = await req.json();
+    upiTxnId = data.upiTxnId;
+    upiScreenshot = data.upiScreenshot;
+  }
+
   if (!data.exam || !data.city || !data.date || !data.bus || !data.userId || !Array.isArray(data.seatNumbers) || data.seatNumbers.length === 0) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
   }
+
   const { bus, busId, date, seatNumbers } = data;
   // Check if any of the requested seats are already booked
   const existing = await Booking.find({ bus, date, seatNumbers: { $in: seatNumbers } });
@@ -70,8 +107,8 @@ export async function POST(req: NextRequest) {
     routeTo: data.routeTo,
     contactNumber: data.contactNumber,
     timing: data.timing,
-    upiScreenshot: data.upiScreenshot,
-    upiTxnId: data.upiTxnId,
+    upiScreenshot,
+    upiTxnId,
     price,
     ...(data.status && { status: data.status })
   };
