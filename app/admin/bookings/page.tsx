@@ -12,39 +12,15 @@ export default function AdminBookingsPage() {
   }, []);
 
   return (
-    <div>
-      <div style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'space-between', 
-        marginBottom: '24px',
-        padding: '20px',
-        background: '#334155',
-        borderRadius: '12px',
-        border: '1px solid #475569',
-        color: 'white',
-        fontWeight: 600,
-        fontSize: '20px',
-        gap: '16px'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <span style={{ fontSize: '24px' }}>📋</span>
-          Booking Management
-        </div>
-        <div style={{ 
-          fontWeight: '600', 
-          fontSize: '16px',
-          color: '#94a3b8'
-        }}>
+    <div className="space-y-8">
+      <div className="flex items-center gap-4 mb-6 p-8 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl shadow-lg">
+        <span className="text-3xl">📋</span>
+        <h1 className="text-2xl font-bold">Booking Management</h1>
+        <div className="ml-auto font-semibold text-lg text-blue-100">
           Total: {total !== null ? total : '...'}
         </div>
       </div>
-      <div style={{ 
-        background: '#334155',
-        borderRadius: '16px',
-        border: '1px solid #475569',
-        overflow: 'hidden'
-      }}>
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
         <AdminBookingManager />
       </div>
     </div>

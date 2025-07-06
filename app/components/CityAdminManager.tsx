@@ -103,68 +103,65 @@ const CityAdminManager = () => {
   };
 
   return (
-    <div style={{ margin: '32px 0', color: '#fff' }}>
-      <h2 style={{ marginBottom: 24, color: '#fff', fontWeight: 900, fontSize: 28, letterSpacing: 0.5 }}>City Management</h2>
-      <form onSubmit={handleAddCity} style={{ marginBottom: 32, display: 'flex', gap: 16, alignItems: 'flex-end', background: '#334155', padding: 24, borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.06)', border: '1px solid #475569' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 200 }}>
-          <label style={{ marginBottom: 4, fontWeight: 600, color: '#94a3b8' }}>New city name</label>
+    <div className="space-y-8">
+      <h2 className="mb-6 font-extrabold text-2xl text-gray-900 tracking-tight">City Management</h2>
+      <form onSubmit={handleAddCity} className="mb-8 flex gap-4 items-end bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+        <div className="flex flex-col min-w-[200px]">
+          <label className="mb-2 font-semibold text-gray-900">New city name</label>
           <input
             type="text"
             value={newCityName}
             onChange={e => setNewCityName(e.target.value)}
             placeholder="Enter city name"
             disabled={actionLoading}
-            style={{ padding: 10, borderRadius: 8, border: '1.5px solid #475569', background: '#1e293b', color: '#fff' }}
+            className="p-2 border border-gray-300 rounded-md bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <button
           type="submit"
           disabled={actionLoading || !newCityName.trim()}
-          style={{ padding: '10px 24px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 16, marginTop: 24, cursor: 'pointer', minWidth: 120, transition: 'background 0.2s' }}
+          className="px-4 py-2 bg-blue-500 text-white rounded-md font-semibold text-sm mt-6"
         >
           Add City
         </button>
       </form>
       {loading ? (
-        <p style={{ color: '#94a3b8' }}>Loading cities...</p>
+        <p className="text-gray-400">Loading cities...</p>
       ) : error ? (
-        <p style={{ color: '#ef4444' }}>{error}</p>
+        <p className="text-red-500">{error}</p>
       ) : (
-        <table style={{ width: '100%', borderCollapse: 'collapse', background: '#334155', borderRadius: 12, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', border: '1px solid #475569', color: '#fff' }}>
-          <thead style={{ background: '#475569' }}>
+        <table className="w-full border-collapse bg-white rounded-2xl shadow-lg border border-gray-200">
+          <thead className="bg-gray-100">
             <tr>
-              <th style={{ border: '1px solid #475569', padding: '10px 8px', fontWeight: 700, color: '#fff' }}>ID</th>
-              <th style={{ border: '1px solid #475569', padding: '10px 8px', fontWeight: 700, color: '#fff' }}>Name</th>
-              <th style={{ border: '1px solid #475569', padding: '10px 8px', fontWeight: 700, color: '#fff' }}>Actions</th>
+              <th className="border border-gray-200 px-4 py-3 font-semibold text-sm text-gray-900">ID</th>
+              <th className="border border-gray-200 px-4 py-3 font-semibold text-sm text-gray-900">Name</th>
+              <th className="border border-gray-200 px-4 py-3 font-semibold text-sm text-gray-900">Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="bg-gray-50">
             {cities.map((city, idx) => (
-              <tr key={city.id ?? city.name ?? idx} style={{ background: idx % 2 === 0 ? '#1e293b' : '#334155', transition: 'background 0.2s' }}
-                onMouseEnter={e => { e.currentTarget.style.background = '#475569'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = idx % 2 === 0 ? '#1e293b' : '#334155'; }}
-              >
-                <td style={{ border: '1px solid #475569', padding: '8px', color: '#fff' }}>{city.id}</td>
-                <td style={{ border: '1px solid #475569', padding: '8px', color: '#fff' }}>{editingCityId === city.id ? (
-                  <form onSubmit={handleEditCity} style={{ display: 'flex', gap: 8 }}>
+              <tr key={city.id ?? city.name ?? idx} className="border-b border-gray-200 transition duration-200">
+                <td className="px-4 py-4 text-sm text-gray-900">{city.id}</td>
+                <td className="px-4 py-4 text-sm text-gray-900">{editingCityId === city.id ? (
+                  <form onSubmit={handleEditCity} className="flex gap-2">
                     <input
                       type="text"
                       value={editingCityName}
                       onChange={e => setEditingCityName(e.target.value)}
                       disabled={actionLoading}
-                      style={{ padding: 8, borderRadius: 6, border: '1.5px solid #475569', minWidth: 120, background: '#1e293b', color: '#fff' }}
+                      className="p-2 border border-gray-300 rounded-md bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[120px]"
                     />
-                    <button type="submit" disabled={actionLoading || !editingCityName.trim()} style={{ padding: '6px 14px', borderRadius: 8, border: 'none', background: '#2563eb', color: '#fff', fontWeight: 700, cursor: 'pointer', fontSize: 15, transition: 'background 0.2s' }}>Save</button>
-                    <button type="button" onClick={() => setEditingCityId(null)} disabled={actionLoading} style={{ padding: '6px 14px', borderRadius: 8, border: 'none', background: '#fbbf24', color: '#222', fontWeight: 700, cursor: 'pointer', fontSize: 15, transition: 'background 0.2s' }}>Cancel</button>
+                    <button type="submit" disabled={actionLoading || !editingCityName.trim()} className="px-4 py-2 bg-blue-500 text-white rounded-md font-semibold text-sm">Save</button>
+                    <button type="button" onClick={() => setEditingCityId(null)} disabled={actionLoading} className="px-4 py-2 bg-yellow-400 text-gray-900 rounded-md font-semibold text-sm">Cancel</button>
                   </form>
                 ) : (
                   city.name
                 )}</td>
-                <td style={{ border: '1px solid #475569', padding: '8px' }}>
+                <td className="px-4 py-4 text-sm text-gray-900">
                   {editingCityId === city.id ? null : (
                     <>
-                      <button onClick={() => startEdit(city)} disabled={actionLoading} style={{ marginRight: 8, padding: '6px 14px', borderRadius: 8, border: 'none', background: '#fbbf24', color: '#222', fontWeight: 700, cursor: 'pointer', fontSize: 15, transition: 'background 0.2s' }}>Edit</button>
-                      <button onClick={() => handleDeleteCity(city.id)} disabled={actionLoading} style={{ padding: '6px 14px', borderRadius: 8, border: 'none', background: '#ef4444', color: '#fff', fontWeight: 700, cursor: 'pointer', fontSize: 15, transition: 'background 0.2s' }}>Delete</button>
+                      <button onClick={() => startEdit(city)} disabled={actionLoading} className="mr-2 px-4 py-2 bg-yellow-400 text-gray-900 rounded-md font-semibold text-sm">Edit</button>
+                      <button onClick={() => handleDeleteCity(city.id)} disabled={actionLoading} className="px-4 py-2 bg-red-500 text-white rounded-md font-semibold text-sm">Delete</button>
                     </>
                   )}
                 </td>

@@ -1,22 +1,22 @@
 "use client";
 import {
-    AlertCircle,
-    ArrowRight,
-    BarChart3,
-    Bus,
-    CheckCircle,
-    Clock,
-    DollarSign,
-    FileText,
-    MapPin,
-    Settings,
-    Shield,
-    Star,
-    Ticket,
-    TrendingUp,
-    UserPlus,
-    Users,
-    XCircle
+  AlertCircle,
+  ArrowRight,
+  BarChart3,
+  Bus,
+  CheckCircle,
+  Clock,
+  DollarSign,
+  FileText,
+  MapPin,
+  Settings,
+  Shield,
+  Star,
+  Ticket,
+  TrendingUp,
+  UserPlus,
+  Users,
+  XCircle
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -102,13 +102,13 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
             <Shield className="h-8 w-8 text-white" />
           </div>
-          <h2 className="text-xl font-semibold text-white mb-2">Loading admin dashboard...</h2>
-          <p className="text-gray-400">Please wait while we fetch your data</p>
+          <h2 className="text-xl font-semibold text-gray-700 mb-2">Loading admin dashboard...</h2>
+          <p className="text-gray-500">Please wait while we fetch your data</p>
         </div>
       </div>
     );
@@ -152,7 +152,7 @@ export default function AdminDashboard() {
   const renderOverview = () => (
     <div className="space-y-8">
       {/* Header */}
-      <Card className="bg-gradient-to-r from-slate-800 to-slate-700 text-white border-0">
+      <Card className="bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0">
         <CardContent className="p-8 relative overflow-hidden">
           <div className="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
           <div className="absolute right-8 top-8 w-16 h-16 bg-white/10 rounded-full"></div>
@@ -161,7 +161,7 @@ export default function AdminDashboard() {
               <Shield className="h-8 w-8" />
               <span>Admin Dashboard</span>
             </h1>
-            <p className="text-slate-300 text-lg">
+            <p className="text-blue-100 text-lg">
               Welcome back, {user?.name || user?.email}! Manage your bus booking system.
             </p>
           </div>
@@ -171,54 +171,54 @@ export default function AdminDashboard() {
       {/* Analytics Cards */}
       {analytics && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="bg-gradient-to-r from-blue-600 to-blue-700 text-white border-0 hover:shadow-lg transition-shadow">
+          <Card className="bg-white border border-gray-200 hover:shadow-lg transition-shadow">
             <CardContent className="p-6 relative">
-              <div className="absolute right-4 top-4 w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-                <Users className="h-6 w-6" />
+              <div className="absolute right-4 top-4 w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                <Users className="h-6 w-6 text-white" />
               </div>
               <div className="mb-4">
-                <p className="text-blue-100 text-sm font-medium">TOTAL USERS</p>
-                <p className="text-3xl font-bold">{analytics.totalUsers}</p>
-                <p className="text-blue-200 text-xs">Registered users</p>
+                <p className="text-gray-600 text-sm font-medium">TOTAL USERS</p>
+                <p className="text-3xl font-bold text-gray-900">{analytics.totalUsers}</p>
+                <p className="text-gray-500 text-xs">Registered users</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-green-600 to-green-700 text-white border-0 hover:shadow-lg transition-shadow">
+          <Card className="bg-white border border-gray-200 hover:shadow-lg transition-shadow">
             <CardContent className="p-6 relative">
-              <div className="absolute right-4 top-4 w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-                <Ticket className="h-6 w-6" />
+              <div className="absolute right-4 top-4 w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center">
+                <Ticket className="h-6 w-6 text-white" />
               </div>
               <div className="mb-4">
-                <p className="text-green-100 text-sm font-medium">TOTAL BOOKINGS</p>
-                <p className="text-3xl font-bold">{analytics.totalBookings}</p>
-                <p className="text-green-200 text-xs">All time bookings</p>
+                <p className="text-gray-600 text-sm font-medium">TOTAL BOOKINGS</p>
+                <p className="text-3xl font-bold text-gray-900">{analytics.totalBookings}</p>
+                <p className="text-gray-500 text-xs">All time bookings</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-amber-600 to-amber-700 text-white border-0 hover:shadow-lg transition-shadow">
+          <Card className="bg-white border border-gray-200 hover:shadow-lg transition-shadow">
             <CardContent className="p-6 relative">
-              <div className="absolute right-4 top-4 w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-                <DollarSign className="h-6 w-6" />
+              <div className="absolute right-4 top-4 w-12 h-12 bg-gradient-to-r from-amber-500 to-amber-600 rounded-lg flex items-center justify-center">
+                <DollarSign className="h-6 w-6 text-white" />
               </div>
               <div className="mb-4">
-                <p className="text-amber-100 text-sm font-medium">TOTAL REVENUE</p>
-                <p className="text-3xl font-bold">₹{analytics.totalRevenue?.toLocaleString() || 0}</p>
-                <p className="text-amber-200 text-xs">Total earnings</p>
+                <p className="text-gray-600 text-sm font-medium">TOTAL REVENUE</p>
+                <p className="text-3xl font-bold text-gray-900">₹{analytics.totalRevenue?.toLocaleString() || 0}</p>
+                <p className="text-gray-500 text-xs">Total earnings</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-red-600 to-red-700 text-white border-0 hover:shadow-lg transition-shadow">
+          <Card className="bg-white border border-gray-200 hover:shadow-lg transition-shadow">
             <CardContent className="p-6 relative">
-              <div className="absolute right-4 top-4 w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-                <Clock className="h-6 w-6" />
+              <div className="absolute right-4 top-4 w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
+                <Clock className="h-6 w-6 text-white" />
               </div>
               <div className="mb-4">
-                <p className="text-red-100 text-sm font-medium">PENDING</p>
-                <p className="text-3xl font-bold">{analytics.pendingBookings}</p>
-                <p className="text-red-200 text-xs">Awaiting approval</p>
+                <p className="text-gray-600 text-sm font-medium">PENDING</p>
+                <p className="text-3xl font-bold text-gray-900">{analytics.pendingBookings}</p>
+                <p className="text-gray-500 text-xs">Awaiting approval</p>
               </div>
             </CardContent>
           </Card>
@@ -412,17 +412,17 @@ export default function AdminDashboard() {
   );
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Sidebar */}
-      <div className="w-64 bg-slate-800 border-r border-slate-700 flex flex-col">
-        <div className="p-6 border-b border-slate-700">
+      <div className="w-64 bg-white border-r border-gray-200 flex flex-col shadow-lg">
+        <div className="p-6 border-b border-gray-200">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
               <Shield className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white">Admin Panel</h1>
-              <p className="text-sm text-slate-400">Bus Booking System</p>
+              <h1 className="text-xl font-bold text-gray-900">Admin Panel</h1>
+              <p className="text-sm text-gray-600">Bus Booking System</p>
             </div>
           </div>
         </div>
@@ -444,8 +444,8 @@ export default function AdminDashboard() {
                   }}
                   className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
                     activeSection === item.id
-                      ? 'bg-slate-700 text-white border border-slate-600'
-                      : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+                      ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-md'
+                      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
                   }`}
                 >
                   <IconComponent className="h-5 w-5" />
@@ -456,10 +456,10 @@ export default function AdminDashboard() {
           </div>
         </nav>
 
-        <div className="p-4 border-t border-slate-700">
+        <div className="p-4 border-t border-gray-200">
           <button
             onClick={() => router.push('/profile')}
-            className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left text-slate-300 hover:bg-slate-700 hover:text-white transition-colors"
+            className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
           >
             <Settings className="h-5 w-5" />
             <span className="font-medium">Settings</span>

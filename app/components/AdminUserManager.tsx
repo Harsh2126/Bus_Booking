@@ -71,38 +71,35 @@ export default function AdminUserManager() {
   };
 
   return (
-    <div style={{ background: '#334155', borderRadius: 18, padding: 32, marginBottom: 32, boxShadow: '0 2px 12px rgba(0,0,0,0.10)', border: '1px solid #475569', color: '#fff' }}>
-      <h3 style={{ color: '#fff', marginBottom: 24, fontWeight: 800, fontSize: 24, letterSpacing: 0.5 }}>User Management</h3>
-      {error && <div style={{ color: '#ef4444', marginBottom: 8 }}>{error}</div>}
-      <table style={{ width: '100%', color: '#fff', borderCollapse: 'collapse', fontSize: 16 }}>
-        <thead>
-          <tr style={{ background: '#475569' }}>
-            <th style={{ padding: 12, textAlign: 'left', color: '#fff', fontWeight: 700 }}>Email</th>
-            <th style={{ padding: 12, textAlign: 'left', color: '#fff', fontWeight: 700 }}>Role</th>
-            <th style={{ padding: 12, color: '#fff', fontWeight: 700 }}>Actions</th>
+    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 mb-8">
+      <h3 className="text-gray-900 mb-6 font-extrabold text-2xl tracking-tight">User Management</h3>
+      {error && <div className="text-red-500 mb-2">{error}</div>}
+      <table className="w-full text-left border-collapse">
+        <thead className="bg-gray-100">
+          <tr>
+            <th className="px-4 py-3 font-semibold text-sm text-gray-900">Email</th>
+            <th className="px-4 py-3 font-semibold text-sm text-gray-900">Role</th>
+            <th className="px-4 py-3 font-semibold text-sm text-gray-900">Actions</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="bg-gray-50">
           {users.map((user, idx) => (
-            <tr key={user._id} style={{ borderBottom: '1.5px solid #334155', background: idx % 2 === 0 ? '#1e293b' : '#334155', transition: 'background 0.2s' }}
-              onMouseEnter={e => { e.currentTarget.style.background = '#475569'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = idx % 2 === 0 ? '#1e293b' : '#334155'; }}
-            >
-              <td style={{ padding: 12 }}>{user.email}</td>
-              <td style={{ padding: 12 }}>{user.role}</td>
-              <td style={{ padding: 12, display: 'flex', gap: 10 }}>
+            <tr key={user._id} className="border-b border-gray-200 transition duration-200">
+              <td className="px-4 py-4 text-sm text-gray-900">{user.email}</td>
+              <td className="px-4 py-4 text-sm text-gray-900">{user.role}</td>
+              <td className="px-4 py-4 flex gap-2">
                 {user.role !== 'admin' ? (
-                  <button onClick={() => handlePromote(user._id)} style={{ background: '#3b82f6', color: '#fff', border: 'none', borderRadius: 8, padding: '6px 14px', fontWeight: 700, cursor: 'pointer', fontSize: 15, transition: 'background 0.2s' }}>Promote to Admin</button>
+                  <button onClick={() => handlePromote(user._id)} className="px-4 py-2 bg-blue-500 text-white rounded-md font-semibold text-sm">Promote to Admin</button>
                 ) : (
-                  <button onClick={() => handleDemote(user._id)} style={{ background: '#64748b', color: '#fff', border: 'none', borderRadius: 8, padding: '6px 14px', fontWeight: 700, cursor: 'pointer', fontSize: 15, transition: 'background 0.2s' }}>Demote to User</button>
+                  <button onClick={() => handleDemote(user._id)} className="px-4 py-2 bg-gray-400 text-white rounded-md font-semibold text-sm">Demote to User</button>
                 )}
-                <button onClick={() => handleDelete(user._id)} style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: 8, padding: '6px 14px', fontWeight: 700, cursor: 'pointer', fontSize: 15, transition: 'background 0.2s' }}>Delete</button>
+                <button onClick={() => handleDelete(user._id)} className="px-4 py-2 bg-red-500 text-white rounded-md font-semibold text-sm">Delete</button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-      {loading && <div style={{ color: '#94a3b8', marginTop: 12 }}>Loading...</div>}
+      {loading && <div className="text-gray-400 mt-3">Loading...</div>}
     </div>
   );
 } 
