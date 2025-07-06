@@ -88,7 +88,7 @@ export default function BookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [buses, setBuses] = useState<Bus[]>([]);
   const [cities, setCities] = useState<City[]>([]);
-  const [user, setUser] = useState<{ email: string; _id?: string } | null>(null);
+  const [user, setUser] = useState<{ email: string; _id?: string; userId?: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -106,9 +106,11 @@ export default function BookingsPage() {
           setUser(data.user);
           
           // Fetch bookings
-          fetch(`/api/bookings?userId=${data.user._id}`)
+          console.log('Fetching bookings for user:', data.user.userId || data.user.email);
+          fetch(`/api/bookings?userId=${data.user.userId || data.user.email}`)
             .then(res => res.json())
             .then(data => {
+              console.log('Bookings data received:', data);
               if (Array.isArray(data.bookings)) setBookings(data.bookings);
             });
             
@@ -136,7 +138,7 @@ export default function BookingsPage() {
     if (!user) return;
     
     const interval = setInterval(() => {
-              fetch(`/api/bookings?userId=${user._id}`)
+              fetch(`/api/bookings?userId=${user.userId || user.email}`)
         .then(res => res.json())
         .then(data => {
           if (Array.isArray(data.bookings)) setBookings(data.bookings);
@@ -237,7 +239,7 @@ export default function BookingsPage() {
         price: selectedBus.price,
         contactNumber: contactNumber,
         exam: selectedBus.exam || '',
-        userId: user?._id || user?.email
+        userId: user?.userId || user?.email
       };
 
       const res = await fetch('/api/bookings', {
@@ -254,7 +256,7 @@ export default function BookingsPage() {
       }
 
       // Re-fetch all bookings after booking
-      fetch(`/api/bookings?userId=${user?._id || user?.email}`)
+      fetch(`/api/bookings?userId=${user?.userId || user?.email}`)
         .then(res => res.json())
         .then(data => {
           if (Array.isArray(data)) setBookings(data);

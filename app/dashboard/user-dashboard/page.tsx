@@ -22,7 +22,8 @@ import { Button } from '../../components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 
 interface User {
-  _id: string;
+  _id?: string;
+  userId?: string;
   email: string;
   name?: string;
   age?: number;
@@ -90,10 +91,12 @@ export default function UserDashboard() {
           }
           setUser(data.user);
           // Always fetch bookings for the current user only
+          console.log('Fetching bookings for user:', data.user.userId || data.user.email);
           Promise.all([
-            fetch(`/api/bookings?userId=${data.user._id || data.user.email}`).then(res => res.json()),
+            fetch(`/api/bookings?userId=${data.user.userId || data.user.email}`).then(res => res.json()),
             fetch('/api/recommendations').then(res => res.json())
           ]).then(([bookingsData, recommendationsData]) => {
+            console.log('Bookings data received:', bookingsData);
             setBookings(bookingsData.bookings || []);
             setRecommendations(recommendationsData.recommendations || []);
             setLoading(false);
@@ -111,7 +114,7 @@ export default function UserDashboard() {
     let interval: NodeJS.Timeout;
     if (user) {
       interval = setInterval(() => {
-        fetch(`/api/bookings?userId=${user._id || user.email}`)
+        fetch(`/api/bookings?userId=${user.userId || user.email}`)
           .then(res => res.json())
           .then(bookingsData => {
             setBookings(bookingsData.bookings || []);

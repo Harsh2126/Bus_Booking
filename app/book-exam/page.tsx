@@ -267,7 +267,7 @@ export default function BookExamPage() {
       date: seatSelectionDate,
       bus: seatSelectionBus.name,
       busNumber: seatSelectionBus.number || '',
-              userId: user._id || user.email,
+              userId: user.userId || user.email,
       seatNumbers: seatSelectionSelectedSeats,
       contactNumber: seatSelectionBus.contactNumber || '',
       timing: seatSelectionBus.timing || '',
