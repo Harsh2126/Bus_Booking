@@ -5,7 +5,14 @@ import Recommendation from '../models/Recommendation';
 
 export async function GET(req: NextRequest) {
   await dbConnect();
-  const buses = await Bus.find().populate('exams');
+  const { searchParams } = new URL(req.url);
+  const queryDate = searchParams.get('date');
+  let buses;
+  if (queryDate) {
+    buses = await Bus.find({ date: queryDate }).populate('exams');
+  } else {
+    buses = await Bus.find().populate('exams');
+  }
   // Map exams to exam names for frontend filtering
   const mappedBuses = buses.map(bus => ({
     ...bus.toObject(),
