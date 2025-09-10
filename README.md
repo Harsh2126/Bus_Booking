@@ -2,7 +2,7 @@
 
 A modern, full-stack bus booking application built with Next.js, featuring real-time tracking, secure payments, and comprehensive admin management.
 
-**🌐 Live Demo:** [https://bus-booking-swart.vercel.app/](bus-booking-swart.vercel.app)
+**🌐 Live Demo:** [https://bus-booking-swart.vercel.app](bus-booking-swart.vercel.app)
 
 ## ✨ Features
 
